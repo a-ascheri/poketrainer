@@ -1,0 +1,355 @@
+{
+	"info": {
+		"_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+		"name": "PokeTrainer API",
+		"description": "Colección de Postman para testear la API de PokeTrainer",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000",
+			"type": "string"
+		},
+		{
+			"key": "access_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "code_verifier",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "code_challenge",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "authorization_code",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "System",
+			"item": [
+				{
+					"name": "Home",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/",
+							"host": ["{{base_url}}"],
+							"path": [""]
+						},
+						"description": "Endpoint de bienvenida que muestra información básica de la API"
+					},
+					"response": []
+				},
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/health",
+							"host": ["{{base_url}}"],
+							"path": ["health"]
+						},
+						"description": "Verifica el estado de salud de la API"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints del sistema"
+		},
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "1. Generate PKCE Codes",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Generar code_verifier aleatorio (43-128 caracteres)",
+									"function generateCodeVerifier() {",
+									"    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';",
+									"    let result = '';",
+									"    for (let i = 0; i < 64; i++) {",
+									"        result += chars.charAt(Math.floor(Math.random() * chars.length));",
+									"    }",
+									"    return result;",
+									"}",
+									"",
+									"// Generar code_challenge usando S256",
+									"async function generateCodeChallenge(verifier) {",
+									"    const encoder = new TextEncoder();",
+									"    const data = encoder.encode(verifier);",
+									"    const digest = await crypto.subtle.digest('SHA-256', data);",
+									"    const base64 = btoa(String.fromCharCode(...new Uint8Array(digest)));",
+									"    return base64.replace(/\\+/g, '-').replace(/\\//g, '_').replace(/=+$/, '');",
+									"}",
+									"",
+									"const codeVerifier = generateCodeVerifier();",
+									"pm.collectionVariables.set('code_verifier', codeVerifier);",
+									"",
+									"generateCodeChallenge(codeVerifier).then(challenge => {",
+									"    pm.collectionVariables.set('code_challenge', challenge);",
+									"    console.log('Code Verifier:', codeVerifier);",
+									"    console.log('Code Challenge:', challenge);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/health",
+							"host": ["{{base_url}}"],
+							"path": ["health"]
+						},
+						"description": "Este request genera automáticamente los códigos PKCE (code_verifier y code_challenge) y los guarda en las variables de colección. Ejecutar primero antes de Authorization."
+					},
+					"response": []
+				},
+				{
+					"name": "2. Authorize (Get Authorization Code)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    if (response.code) {",
+									"        pm.collectionVariables.set('authorization_code', response.code);",
+									"        console.log('Authorization code guardado:', response.code);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/authorize?client_id=poketrainer-app&redirect_uri=http://localhost:3000/callback&code_challenge={{code_challenge}}&code_challenge_method=S256&username=testuser&password=testpassword123",
+							"host": ["{{base_url}}"],
+							"path": ["authorize"],
+							"query": [
+								{
+									"key": "client_id",
+									"value": "poketrainer-app",
+									"description": "ID del cliente"
+								},
+								{
+									"key": "redirect_uri",
+									"value": "http://localhost:3000/callback",
+									"description": "URL de redirección"
+								},
+								{
+									"key": "code_challenge",
+									"value": "{{code_challenge}}",
+									"description": "Code challenge generado con S256"
+								},
+								{
+									"key": "code_challenge_method",
+									"value": "S256",
+									"description": "Método de challenge"
+								},
+								{
+									"key": "username",
+									"value": "testuser",
+									"description": "Nombre de usuario"
+								},
+								{
+									"key": "password",
+									"value": "testpassword123",
+									"description": "Contraseña del usuario"
+								}
+							]
+						},
+						"description": "Endpoint de autorización OAuth2 con PKCE. Retorna un código de autorización."
+					},
+					"response": []
+				},
+				{
+					"name": "3. Token (Exchange Code for Token)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    if (response.access_token) {",
+									"        pm.collectionVariables.set('access_token', response.access_token);",
+									"        console.log('Access token guardado');",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "grant_type",
+									"value": "authorization_code",
+									"description": "Tipo de grant"
+								},
+								{
+									"key": "code",
+									"value": "{{authorization_code}}",
+									"description": "Código de autorización obtenido"
+								},
+								{
+									"key": "redirect_uri",
+									"value": "http://localhost:3000/callback",
+									"description": "Debe coincidir con el usado en /authorize"
+								},
+								{
+									"key": "client_id",
+									"value": "poketrainer-app",
+									"description": "ID del cliente"
+								},
+								{
+									"key": "code_verifier",
+									"value": "{{code_verifier}}",
+									"description": "Code verifier original"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/token",
+							"host": ["{{base_url}}"],
+							"path": ["token"]
+						},
+						"description": "Intercambia el código de autorización por un access token JWT"
+					},
+					"response": []
+				}
+			],
+			"description": "Flujo de autenticación OAuth2 con PKCE"
+		},
+		{
+			"name": "Trainers",
+			"item": [
+				{
+					"name": "Create Trainer",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"ash_ketchum\",\n    \"email\": \"ash@pokemon.com\",\n    \"password\": \"pikachu123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/trainers/",
+							"host": ["{{base_url}}"],
+							"path": ["trainers", ""]
+						},
+						"description": "Crea un nuevo entrenador Pokemon. Requiere autenticación."
+					},
+					"response": []
+				},
+				{
+					"name": "List Trainers",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/trainers/",
+							"host": ["{{base_url}}"],
+							"path": ["trainers", ""]
+						},
+						"description": "Lista todos los entrenadores Pokemon. Requiere autenticación."
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints para gestión de entrenadores Pokemon"
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{access_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
