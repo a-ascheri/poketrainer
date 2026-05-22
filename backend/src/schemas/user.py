@@ -12,6 +12,6 @@ class UserCreate(UserBase):
 
 class UserRead(UserBase):
     id: int
-    
+
     class Config:
         from_attributes = True

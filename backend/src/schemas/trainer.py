@@ -1,5 +1,6 @@
-from pydantic import BaseModel, EmailStr
 from datetime import datetime
+
+from pydantic import BaseModel, EmailStr
 
 
 class TrainerBase(BaseModel):
@@ -18,3 +19,10 @@ class TrainerRead(TrainerBase):
 
     class Config:
         from_attributes = True
+
+
+# Para updates parciales
+class TrainerUpdate(BaseModel):
+    username: str | None = None
+    email: EmailStr | None = None
+    password: str | None = None

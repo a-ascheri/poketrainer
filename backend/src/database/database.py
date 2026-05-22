@@ -1,15 +1,14 @@
 # Conexión a PostgreSQL para PokéTrainer
 # Versión optimizada para Alembic
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
 import os
 
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
 
-# URL de conexión a PostgreSQL 
+# URL de conexión a PostgreSQL
 # FORMATO: postgresql://usuario:contraseña@host:puerto/nombre_bd
 DATABASE_URL = os.getenv(
-    "DATABASE_URL", 
-    "postgresql://pokemaster:pikapassword123@localhost:5433/poketrainer"
+    "DATABASE_URL", "postgresql://pokemaster:pikapassword123@localhost:5433/poketrainer"
 )
 
 # Base para todos los modelos SQLAlchemy
@@ -26,7 +25,8 @@ engine = None
 def setup_engine(url: str = None):
     global engine, SessionLocal
     # Importación diferida
-    from sqlalchemy import create_engine 
+    from sqlalchemy import create_engine
+
     url_to_use = url or DATABASE_URL
     engine = create_engine(url_to_use)
     SessionLocal.configure(bind=engine)

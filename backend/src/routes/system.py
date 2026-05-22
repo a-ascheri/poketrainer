@@ -1,6 +1,5 @@
 from fastapi import APIRouter
 
-
 router = APIRouter()
 
 
@@ -13,8 +12,8 @@ def home():
         "endpoints": {
             "documentation": "/docs",
             "health_check": "/health",
-            "trainers": "/trainers/"
-        }
+            "trainers": "/trainers/",
+        },
     }
 
 
@@ -23,5 +22,5 @@ def health_check():
     return {
         "status": "healthy",
         "service": "poketrainer-api",
-        "timestamp": "2024-01-15T10:00:00Z"
+        "timestamp": "2024-01-15T10:00:00Z",
     }
