@@ -1,0 +1,58 @@
+.app-header {
+  align-items: center;
+  background: linear-gradient(145deg, #1e1e1e 0%, #101010 60%);
+  border: 1px solid #3a3a3a;
+  border-radius: 18px;
+  display: flex;
+  justify-content: space-between;
+  margin: 0 auto 1.5rem;
+  max-width: 1040px;
+  padding: 1rem 1.25rem;
+}
+
+.app-header__brand {
+  align-items: center;
+  display: flex;
+  gap: 0.9rem;
+}
+
+.app-header__ball {
+  background: linear-gradient(#e40404 0 48%, #f2f2f2 48% 100%);
+  border: 3px solid #151515;
+  border-radius: 999px;
+  box-shadow: 0 0 0 3px #ffffff1a;
+  display: block;
+  height: 2.2rem;
+  position: relative;
+  width: 2.2rem;
+}
+
+.app-header__subtitle {
+  color: #d7d7d7;
+  font-size: 0.75rem;
+  letter-spacing: 0.08rem;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.app-header__title {
+  color: #ffffff;
+  font-size: 1.35rem;
+  margin: 0.05rem 0 0;
+}
+
+.app-header__logout {
+  background: #e40404;
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 700;
+  padding: 0.6rem 1rem;
+  transition: transform 0.15s ease, opacity 0.2s ease;
+}
+
+.app-header__logout:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}

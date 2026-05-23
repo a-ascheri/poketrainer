@@ -1,0 +1,26 @@
+@import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&display=swap');
+
+:root {
+  color-scheme: dark;
+  font-family: 'Chakra Petch', sans-serif;
+  line-height: 1.45;
+  --bg: #0d0d0d;
+  --surface: #1c1c1c;
+  --text: #f6f6f6;
+  --accent: #e40404;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: linear-gradient(180deg, #0d0d0d 0%, #1a1a1a 100%);
+  color: var(--text);
+  margin: 0;
+  min-height: 100vh;
+}
+
+#root {
+  min-height: 100vh;
+}

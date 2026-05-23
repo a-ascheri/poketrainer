@@ -1,16 +1,53 @@
-# React + Vite
+# PokeTrainer Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Frontend modular construido con React + Vite + TypeScript.
 
-Currently, two official plugins are available:
+## Tecnologías
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- React 19
+- Vite 8
+- TypeScript 5
+- Axios
+- Sass
+- React Router
 
-## React Compiler
+## Estructura
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+```text
+src/
+	app/                  # Composición principal de pantallas y rutas
+	components/           # Componentes reutilizables por dominio
+		Auth/
+		Layout/
+		Pokemon/
+	context/              # Estado global (AuthContext)
+	services/             # API backend + servicios de PokeAPI
+	assets/               # Recursos estáticos
+	styles/               # Estilos globales
+```
 
-## Expanding the ESLint configuration
+## Scripts
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- `npm run dev`: levanta el entorno de desarrollo.
+- `npm run build`: chequeo TypeScript + build producción.
+- `npm run lint`: análisis estático de código.
+- `npm run preview`: preview de build local.
+
+## Variables y Endpoints
+
+- Backend esperado: `http://localhost:8000`
+- Login: `POST /login`
+- Registro: `POST /users/`
+- Pokemons: `https://pokeapi.co/api/v2/pokemon/{nameOrId}`
+
+## Flujo inicial
+
+1. Registro de usuario.
+2. Login.
+3. Acceso a home protegida con buscador Pokémon.
+4. Logout elimina token y limpia contraseña en el formulario (se conserva solo usuario previo para comodidad).
+
+## Desarrollo
+
+Este frontend está preparado para crecer por módulos sin acoplar la UI a los servicios.
+Para nuevos dominios, agregar carpetas bajo `components` y `services` manteniendo la separación de responsabilidades.
