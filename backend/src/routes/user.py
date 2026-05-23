@@ -20,7 +20,10 @@ router = APIRouter()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token")
 
 
-def create_user(user: UserCreate, db: Session = Depends(get_db)):
+
+# Endpoint para crear usuario
+@router.post("/users/", response_model=UserRead)
+def create_user_route(user: UserCreate, db: Session = Depends(get_db)):
     return create_user_service(user, db)
 
 
@@ -88,6 +91,15 @@ async def token(
 
     access_token = create_access_token({"sub": data["username"]})
     del authorization_codes[code]
+    return {"access_token": access_token, "token_type": "bearer"}
+
+
+@router.post("/login")
+def login(username: str = Form(...), password: str = Form(...), db: Session = Depends(get_db)):
+    user = authenticate_user(username, password, db)
+    if not user:
+        raise HTTPException(status_code=401, detail="Credenciales inválidas")
+    access_token = create_access_token({"sub": user.username})
     return {"access_token": access_token, "token_type": "bearer"}
 
 

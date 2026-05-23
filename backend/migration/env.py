@@ -5,8 +5,8 @@ from logging.config import fileConfig
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 
-import models.trainer
-from database.database import Base
+from src.models import trainer, user
+from src.database.database import Base
 
 config = context.config
 target_metadata = Base.metadata
