@@ -20,9 +20,15 @@ const LoginForm = () => {
 
     try {
       const response = await login({ username, password });
-      signIn(response.access_token, username);
+      await signIn(response.access_token, username);
       setPassword('');
-      navigate('/');
+      if (response.force_password_change) {
+        navigate('/force-password-change');
+      } else if (response.role === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/');
+      }
     } catch {
       setError('No se pudo iniciar sesión. Revisá tus credenciales.');
     } finally {

@@ -1,5 +1,6 @@
 import { FormEvent, useState } from 'react';
 import PokemonCard from '@components/Pokemon/PokemonCard';
+import PokemonDetails from '@components/Pokemon/PokemonDetails';
 import { searchPokemon, type PokemonData } from '@services/pokemon/pokemonService';
 import './styles.scss';
 
@@ -47,6 +48,7 @@ const PokemonSearch = () => {
       {pokemon && (
         <div className="search-panel__result">
           <PokemonCard pokemon={pokemon} />
+          <PokemonDetails pokemon={pokemon} />
         </div>
       )}
     </section>

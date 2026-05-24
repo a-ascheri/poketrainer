@@ -383,6 +383,267 @@
 				}
 			],
 			"description": "Endpoints para gestión de entrenadores Pokemon"
+		},
+		{
+			"name": "Admin Management",
+			"description": "Endpoints para administración de usuarios (solo admin)",
+			"item": [
+				{
+					"name": "Admin List Users",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/admin/users",
+							"host": ["{{base_url}}"],
+							"path": ["admin", "users"]
+						}
+					}
+				},
+				{
+					"name": "Admin Update User",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"updated_user\",\n  \"is_active\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/admin/users/2",
+							"host": ["{{base_url}}"],
+							"path": ["admin", "users", "2"]
+						}
+					}
+				},
+				{
+					"name": "Admin Soft Delete User",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"url": {
+							"raw": "{{base_url}}/admin/users/2",
+							"host": ["{{base_url}}"],
+							"path": ["admin", "users", "2"]
+						}
+					}
+				},
+				{
+					"name": "Hidden Create Admin",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"opsadmin\",\n  \"email\": \"opsadmin@pokemon.com\",\n  \"password\": \"ops12345\",\n  \"permissions\": [\"manage_users\",\"manage_admins\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/internal/admins",
+							"host": ["{{base_url}}"],
+							"path": ["internal", "admins"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Trainer Pokemon",
+			"description": "Flujo de starter y progresión pokemon por trainer",
+			"item": [
+				{
+					"name": "Starter Options",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/trainer/starter/options",
+							"host": ["{{base_url}}"],
+							"path": ["trainer", "starter", "options"]
+						}
+					}
+				},
+				{
+					"name": "Select Starter",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"pokemon_name\": \"bulbasaur\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/trainer/starter/select",
+							"host": ["{{base_url}}"],
+							"path": ["trainer", "starter", "select"]
+						}
+					}
+				},
+				{
+					"name": "Gain Experience",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"amount\": 1200\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/trainer/pokemon/1/gain-exp",
+							"host": ["{{base_url}}"],
+							"path": ["trainer", "pokemon", "1", "gain-exp"]
+						}
+					}
+				},
+				{
+					"name": "Pokemon Stats",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/trainer/pokemon/1/stats",
+							"host": ["{{base_url}}"],
+							"path": ["trainer", "pokemon", "1", "stats"]
+						}
+					}
+				},
+				{
+					"name": "Pokemon Moves",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/trainer/pokemon/1/moves",
+							"host": ["{{base_url}}"],
+							"path": ["trainer", "pokemon", "1", "moves"]
+						}
+					}
+				}
+			]
 		}
 	],
 	"auth": {

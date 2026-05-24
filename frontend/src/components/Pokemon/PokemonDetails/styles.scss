@@ -1,0 +1,30 @@
+.pokemon-details {
+  background: #131313;
+  border: 1px solid #373737;
+  border-radius: 14px;
+  margin-top: 1rem;
+  padding: 1rem;
+}
+
+.pokemon-details h4 {
+  color: #fff;
+  margin: 0 0 0.8rem;
+}
+
+.pokemon-details__group {
+  margin-bottom: 0.75rem;
+}
+
+.pokemon-details__group strong {
+  color: #fff;
+}
+
+.pokemon-details__group p,
+.pokemon-details__group li {
+  color: #d5d5d5;
+}
+
+.pokemon-details__group ul {
+  margin: 0.35rem 0 0;
+  padding-left: 1rem;
+}

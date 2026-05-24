@@ -44,8 +44,11 @@ src/
 
 1. Registro de usuario.
 2. Login.
-3. Acceso a home protegida con buscador Pokémon.
-4. Logout elimina token y limpia contraseña en el formulario (se conserva solo usuario previo para comodidad).
+3. Si el backend fuerza cambio de contraseña, se muestra pantalla obligatoria.
+4. Si el usuario trainer no eligió starter, se muestra selección inicial (Bulbasaur, Charmander o Squirtle).
+5. Acceso a home protegida con buscador Pokémon + detalle avanzado (habilidades, evolución, movimientos).
+6. Si el usuario es admin, accede al panel de administración de usuarios.
+7. Logout elimina token y limpia contraseña en el formulario (se conserva solo usuario previo para comodidad).
 
 ## Desarrollo
 

@@ -14,6 +14,19 @@ export interface RegisterPayload {
 export interface TokenResponse {
   access_token: string;
   token_type: string;
+  role: 'admin' | 'trainer';
+  force_password_change: boolean;
+}
+
+export interface UserProfile {
+  id: number;
+  username: string;
+  email: string;
+  role: 'admin' | 'trainer';
+  permissions: string[];
+  force_password_change: boolean;
+  starter_pokemon_selected: boolean;
+  is_active: boolean;
 }
 
 export const login = async (payload: LoginPayload): Promise<TokenResponse> => {
@@ -31,4 +44,19 @@ export const login = async (payload: LoginPayload): Promise<TokenResponse> => {
 
 export const register = async (payload: RegisterPayload): Promise<void> => {
   await backendClient.post('/users/', payload);
+};
+
+export const getCurrentUserProfile = async (): Promise<UserProfile> => {
+  const response = await backendClient.get<UserProfile>('/users/me');
+  return response.data;
+};
+
+export const changePassword = async (
+  currentPassword: string,
+  newPassword: string,
+): Promise<void> => {
+  await backendClient.post('/users/me/change-password', {
+    current_password: currentPassword,
+    new_password: newPassword,
+  });
 };

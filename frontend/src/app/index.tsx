@@ -1,9 +1,12 @@
 import { type ReactNode } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
+import UserManagement from '@components/Admin/UserManagement';
+import ForcePasswordChange from '@components/Auth/ForcePasswordChange';
 import LoginForm from '@components/Auth/LoginForm';
 import RegisterForm from '@components/Auth/RegisterForm';
 import AppHeader from '@components/Layout/AppHeader';
 import PokemonSearch from '@components/Pokemon/PokemonSearch';
+import StarterSelection from '@components/Trainer/StarterSelection';
 import { useAuth } from '@context/AuthContext';
 import './styles.scss';
 
@@ -13,7 +16,23 @@ const RequireAuth = ({ children }: { children: ReactNode }) => {
 };
 
 function App() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, profile } = useAuth();
+
+  const redirectByProfile = () => {
+    if (!profile) {
+      return '/login';
+    }
+    if (profile.force_password_change) {
+      return '/force-password-change';
+    }
+    if (profile.role === 'admin') {
+      return '/admin';
+    }
+    if (!profile.starter_pokemon_selected) {
+      return '/starter';
+    }
+    return '/';
+  };
 
   return (
     <div className="app-shell">
@@ -24,21 +43,64 @@ function App() {
         <Routes>
           <Route
             path="/login"
-            element={isAuthenticated ? <Navigate to="/" replace /> : <LoginForm />}
+            element={isAuthenticated ? <Navigate to={redirectByProfile()} replace /> : <LoginForm />}
           />
           <Route
             path="/register"
             element={isAuthenticated ? <Navigate to="/" replace /> : <RegisterForm />}
           />
           <Route
-            path="/"
+            path="/force-password-change"
             element={
               <RequireAuth>
-                <PokemonSearch />
+                {profile?.force_password_change ? (
+                  <ForcePasswordChange />
+                ) : (
+                  <Navigate to={redirectByProfile()} replace />
+                )}
               </RequireAuth>
             }
           />
-          <Route path="*" element={<Navigate to={isAuthenticated ? '/' : '/login'} replace />} />
+          <Route
+            path="/starter"
+            element={
+              <RequireAuth>
+                {profile?.role === 'trainer' && !profile.starter_pokemon_selected ? (
+                  <StarterSelection />
+                ) : (
+                  <Navigate to={redirectByProfile()} replace />
+                )}
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <RequireAuth>
+                {profile?.role === 'admin' ? (
+                  <UserManagement />
+                ) : (
+                  <Navigate to={redirectByProfile()} replace />
+                )}
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/"
+            element={
+              <RequireAuth>
+                {profile?.role === 'trainer' && profile.starter_pokemon_selected ? (
+                  <PokemonSearch />
+                ) : (
+                  <Navigate to={redirectByProfile()} replace />
+                )}
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="*"
+            element={<Navigate to={isAuthenticated ? redirectByProfile() : '/login'} replace />}
+          />
         </Routes>
       </main>
     </div>

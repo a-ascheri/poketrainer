@@ -1,0 +1,60 @@
+.admin-users {
+  background: #141414;
+  border: 1px solid #3a3a3a;
+  border-radius: 16px;
+  margin: 0 auto;
+  max-width: 1040px;
+  padding: 1.2rem;
+}
+
+.admin-users h2 {
+  color: #fff;
+  margin: 0;
+}
+
+.admin-users p {
+  color: #d2d2d2;
+}
+
+.admin-users__table {
+  overflow-x: auto;
+}
+
+.admin-users table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.admin-users th,
+.admin-users td {
+  border-bottom: 1px solid #2e2e2e;
+  color: #f0f0f0;
+  padding: 0.65rem;
+  text-align: left;
+}
+
+.admin-users button {
+  background: #e40404;
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+  margin-right: 0.45rem;
+  padding: 0.45rem 0.6rem;
+}
+
+.admin-users input {
+  background: #0f0f0f;
+  border: 1px solid #4f4f4f;
+  border-radius: 8px;
+  color: #fff;
+  padding: 0.4rem;
+}
+
+.admin-users__error {
+  background: #8d10102e;
+  border: 1px solid #ff7b7b52;
+  border-radius: 10px;
+  color: #ffadad;
+  padding: 0.6rem;
+}

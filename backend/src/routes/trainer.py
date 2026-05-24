@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from src.routes.user import get_current_user
+from src.routes.user import require_admin
 from src.schemas.trainer import TrainerCreate, TrainerRead, TrainerUpdate
 from src.services.trainer_service import (
     create_trainer,
@@ -19,13 +19,13 @@ router = APIRouter()
 def create_trainer_route(
     trainer: TrainerCreate,
     db: Session = Depends(get_db),
-    user=Depends(get_current_user),
+    admin=Depends(require_admin),
 ):
     return create_trainer(trainer, db)
 
 
 @router.get("/trainers/", response_model=list[TrainerRead])
-def list_trainers_route(db: Session = Depends(get_db), user=Depends(get_current_user)):
+def list_trainers_route(db: Session = Depends(get_db), admin=Depends(require_admin)):
     return list_trainers(db)
 
 
@@ -34,14 +34,14 @@ def update_trainer_route(
     trainer_id: int,
     trainer_update: TrainerUpdate,
     db: Session = Depends(get_db),
-    user=Depends(get_current_user),
+    admin=Depends(require_admin),
 ):
     return update_trainer(trainer_id, trainer_update, db)
 
 
 @router.delete("/trainers/{trainer_id}")
 def delete_trainer_route(
-    trainer_id: int, db: Session = Depends(get_db), user=Depends(get_current_user)
+    trainer_id: int, db: Session = Depends(get_db), admin=Depends(require_admin)
 ):
     """_summary_
 

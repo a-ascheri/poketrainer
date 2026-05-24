@@ -5,7 +5,7 @@ from logging.config import fileConfig
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 
-from src.models import trainer, user
+from src.models import pokemon, trainer, trainer_pokemon, user
 from src.database.database import Base
 
 config = context.config

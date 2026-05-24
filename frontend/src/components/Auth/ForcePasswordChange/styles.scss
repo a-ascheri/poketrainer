@@ -1,0 +1,58 @@
+.force-password {
+  background: #151515;
+  border: 1px solid #3a3a3a;
+  border-radius: 16px;
+  margin: 0 auto;
+  max-width: 520px;
+  padding: 1.4rem;
+}
+
+.force-password h2 {
+  color: #fff;
+  margin: 0;
+}
+
+.force-password p {
+  color: #d5d5d5;
+}
+
+.force-password__form {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.force-password__form input {
+  background: #0f0f0f;
+  border: 1px solid #4f4f4f;
+  border-radius: 10px;
+  color: #fff;
+  padding: 0.65rem 0.75rem;
+}
+
+.force-password__form button {
+  background: #e40404;
+  border: 0;
+  border-radius: 10px;
+  color: #fff;
+  cursor: pointer;
+  margin-top: 0.5rem;
+  padding: 0.72rem;
+}
+
+.force-password__feedback {
+  border-radius: 8px;
+  margin-top: 0.85rem;
+  padding: 0.55rem;
+}
+
+.force-password__feedback--error {
+  background: #8d10102e;
+  border: 1px solid #ff7b7b52;
+  color: #ffadad;
+}
+
+.force-password__feedback--success {
+  background: #218a3a2e;
+  border: 1px solid #70f09f42;
+  color: #8dffc4;
+}

@@ -28,7 +28,8 @@ def setup_engine(url: str = None):
     from sqlalchemy import create_engine
 
     url_to_use = url or DATABASE_URL
-    engine = create_engine(url_to_use)
+    connect_args = {"check_same_thread": False} if url_to_use.startswith("sqlite") else {}
+    engine = create_engine(url_to_use, connect_args=connect_args)
     SessionLocal.configure(bind=engine)
     return engine
 
