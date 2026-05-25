@@ -61,7 +61,9 @@ def pokeapi_mock(monkeypatch):
                     "evolves_to": [
                         {
                             "species": {"name": "ivysaur"},
-                            "evolves_to": [{"species": {"name": "venusaur"}, "evolves_to": []}],
+                            "evolves_to": [
+                                {"species": {"name": "venusaur"}, "evolves_to": []}
+                            ],
                         }
                     ],
                 }

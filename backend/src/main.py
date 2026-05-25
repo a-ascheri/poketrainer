@@ -23,6 +23,7 @@ async def lifespan(app: FastAPI):
         db.close()
     yield
 
+
 # Constructor principa, Nombre en /docs, Descripción, Versión de la API
 app = FastAPI(
     title="PokeTrainer",
@@ -34,7 +35,7 @@ app = FastAPI(
 # Habilitar CORS para el frontend en desarrollo
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],  # Cambia esto en producción
+    allow_origins=["http://localhost:5173"],  # Cambiar esto en producción
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

@@ -137,7 +137,9 @@ def get_or_create_pokemon(db: Session, query: str) -> Pokemon:
         return existing
 
     species_url = payload.get("species", {}).get("url")
-    evolution_chain = _load_evolution_chain(species_url) if species_url else {"chain": {}}
+    evolution_chain = (
+        _load_evolution_chain(species_url) if species_url else {"chain": {}}
+    )
 
     model_data = _build_pokemon_model(payload, evolution_chain)
     pokemon = Pokemon(**model_data)
@@ -200,10 +202,14 @@ def _create_owned_pokemon(
     return owned
 
 
-def select_starter_pokemon(db: Session, trainer: User, pokemon_name: str) -> TrainerPokemon:
+def select_starter_pokemon(
+    db: Session, trainer: User, pokemon_name: str
+) -> TrainerPokemon:
     normalized = pokemon_name.strip().lower()
     if normalized not in STARTER_NAMES:
-        raise HTTPException(status_code=400, detail="Starter must be Bulbasaur, Charmander or Squirtle")
+        raise HTTPException(
+            status_code=400, detail="Starter must be Bulbasaur, Charmander or Squirtle"
+        )
 
     if trainer.starter_pokemon_selected:
         raise HTTPException(status_code=400, detail="Starter already selected")
@@ -219,7 +225,10 @@ def acquire_pokemon(db: Session, trainer: User, pokeapi_id: int) -> TrainerPokem
     pokemon = get_or_create_pokemon(db, str(pokeapi_id))
 
     if pokemon.name in STARTER_NAMES:
-        raise HTTPException(status_code=400, detail="Starter pokemon can only be selected in starter flow")
+        raise HTTPException(
+            status_code=400,
+            detail="Starter pokemon can only be selected in starter flow",
+        )
 
     existing = (
         db.query(TrainerPokemon)
@@ -240,7 +249,9 @@ def gain_experience(
     db: Session, trainer: User, trainer_pokemon_id: int, amount: int
 ) -> TrainerPokemon:
     if amount <= 0:
-        raise HTTPException(status_code=400, detail="Experience amount must be greater than 0")
+        raise HTTPException(
+            status_code=400, detail="Experience amount must be greater than 0"
+        )
 
     owned = _get_owned_pokemon_or_404(db, trainer.id, trainer_pokemon_id)
     owned.current_experience += amount
@@ -259,7 +270,9 @@ def gain_experience(
         owned.sp_attack = stats["sp_attack"]
         owned.sp_defense = stats["sp_defense"]
         owned.speed = stats["speed"]
-        owned.known_moves = _known_moves_for_level(owned.pokemon.moves or [], next_level)
+        owned.known_moves = _known_moves_for_level(
+            owned.pokemon.moves or [], next_level
+        )
 
     owned.updated_at = datetime.now(timezone.utc)
     db.commit()
@@ -267,9 +280,13 @@ def gain_experience(
     return owned
 
 
-def get_trainer_pokemon_stats(db: Session, trainer: User, trainer_pokemon_id: int) -> TrainerPokemon:
+def get_trainer_pokemon_stats(
+    db: Session, trainer: User, trainer_pokemon_id: int
+) -> TrainerPokemon:
     return _get_owned_pokemon_or_404(db, trainer.id, trainer_pokemon_id)
 
 
-def get_trainer_pokemon_moves(db: Session, trainer: User, trainer_pokemon_id: int) -> TrainerPokemon:
+def get_trainer_pokemon_moves(
+    db: Session, trainer: User, trainer_pokemon_id: int
+) -> TrainerPokemon:
     return _get_owned_pokemon_or_404(db, trainer.id, trainer_pokemon_id)

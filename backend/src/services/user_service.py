@@ -5,7 +5,8 @@ from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 
 from src.models.user import User
-from src.schemas.user import AdminCreate, ChangePasswordInput, UserCreate, UserUpdate
+from src.schemas.user import (AdminCreate, ChangePasswordInput, UserCreate,
+                              UserUpdate)
 
 ADMIN_ROLE = "admin"
 TRAINER_ROLE = "trainer"
@@ -26,14 +27,18 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
 
-def _assert_unique_username_email(db: Session, username: str, email: str, skip_id: int | None = None):
+def _assert_unique_username_email(
+    db: Session, username: str, email: str, skip_id: int | None = None
+):
     query = db.query(User).filter((User.username == username) | (User.email == email))
     if skip_id is not None:
         query = query.filter(User.id != skip_id)
 
     existing = query.first()
     if existing:
-        raise HTTPException(status_code=400, detail="Username or email already registered")
+        raise HTTPException(
+            status_code=400, detail="Username or email already registered"
+        )
 
 
 def create_user(user: UserCreate, db: Session):
@@ -158,7 +163,11 @@ def change_password(user: User, payload: ChangePasswordInput, db: Session):
 def authenticate_user(username: str, password: str, db: Session):
     user = (
         db.query(User)
-        .filter(User.username == username, User.deleted_at.is_(None), User.is_active.is_(True))
+        .filter(
+            User.username == username,
+            User.deleted_at.is_(None),
+            User.is_active.is_(True),
+        )
         .first()
     )
 

@@ -1,4 +1,5 @@
-from src.services.pokemon_service import _calculate_battle_stats, _experience_to_level
+from src.services.pokemon_service import (_calculate_battle_stats,
+                                          _experience_to_level)
 
 
 def test_experience_to_level_growth():

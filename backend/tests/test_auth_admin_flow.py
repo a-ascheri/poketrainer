@@ -20,7 +20,9 @@ def test_initial_admin_must_change_password(client):
     assert login_payload["role"] == "admin"
     assert login_payload["force_password_change"] is True
 
-    denied = client.get("/admin/users", headers=_auth_headers(login_payload["access_token"]))
+    denied = client.get(
+        "/admin/users", headers=_auth_headers(login_payload["access_token"])
+    )
     assert denied.status_code == 403
 
     change_password = client.post(

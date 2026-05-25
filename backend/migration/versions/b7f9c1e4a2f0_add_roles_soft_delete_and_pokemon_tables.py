@@ -5,11 +5,11 @@ Revises: a12570f9730d
 Create Date: 2026-05-24 13:10:00.000000
 
 """
+
 from typing import Sequence, Union
 
-from alembic import op
 import sqlalchemy as sa
-
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "b7f9c1e4a2f0"
@@ -28,14 +28,18 @@ def upgrade() -> None:
         "users", sa.Column("starter_pokemon_selected", sa.Boolean(), nullable=True)
     )
     op.add_column("users", sa.Column("is_active", sa.Boolean(), nullable=True))
-    op.add_column("users", sa.Column("deleted_at", sa.DateTime(timezone=True), nullable=True))
+    op.add_column(
+        "users", sa.Column("deleted_at", sa.DateTime(timezone=True), nullable=True)
+    )
     op.add_column(
         "users",
         sa.Column(
             "created_at", sa.DateTime(timezone=True), server_default=sa.text("now()")
         ),
     )
-    op.add_column("users", sa.Column("updated_at", sa.DateTime(timezone=True), nullable=True))
+    op.add_column(
+        "users", sa.Column("updated_at", sa.DateTime(timezone=True), nullable=True)
+    )
 
     op.execute("UPDATE users SET role = 'trainer' WHERE role IS NULL")
     op.execute("UPDATE users SET permissions = '[]'::json WHERE permissions IS NULL")
@@ -67,13 +71,20 @@ def upgrade() -> None:
         sa.Column("moves", sa.JSON(), nullable=False),
         sa.Column("evolution_chain", sa.JSON(), nullable=True),
         sa.Column("raw_payload", sa.JSON(), nullable=True),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=True),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=True,
+        ),
         sa.Column("updated_at", sa.DateTime(timezone=True), nullable=True),
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_index(op.f("ix_pokemons_id"), "pokemons", ["id"], unique=False)
     op.create_index(op.f("ix_pokemons_name"), "pokemons", ["name"], unique=True)
-    op.create_index(op.f("ix_pokemons_pokeapi_id"), "pokemons", ["pokeapi_id"], unique=True)
+    op.create_index(
+        op.f("ix_pokemons_pokeapi_id"), "pokemons", ["pokeapi_id"], unique=True
+    )
 
     op.create_table(
         "trainer_pokemon",
@@ -93,16 +104,38 @@ def upgrade() -> None:
         sa.Column("known_moves", sa.JSON(), nullable=False),
         sa.Column("is_active", sa.Boolean(), nullable=False),
         sa.Column("deleted_at", sa.DateTime(timezone=True), nullable=True),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=True),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=True,
+        ),
         sa.Column("updated_at", sa.DateTime(timezone=True), nullable=True),
         sa.ForeignKeyConstraint(["pokemon_id"], ["pokemons.id"]),
         sa.ForeignKeyConstraint(["trainer_id"], ["users.id"]),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(op.f("ix_trainer_pokemon_id"), "trainer_pokemon", ["id"], unique=False)
-    op.create_index(op.f("ix_trainer_pokemon_is_active"), "trainer_pokemon", ["is_active"], unique=False)
-    op.create_index(op.f("ix_trainer_pokemon_pokemon_id"), "trainer_pokemon", ["pokemon_id"], unique=False)
-    op.create_index(op.f("ix_trainer_pokemon_trainer_id"), "trainer_pokemon", ["trainer_id"], unique=False)
+    op.create_index(
+        op.f("ix_trainer_pokemon_id"), "trainer_pokemon", ["id"], unique=False
+    )
+    op.create_index(
+        op.f("ix_trainer_pokemon_is_active"),
+        "trainer_pokemon",
+        ["is_active"],
+        unique=False,
+    )
+    op.create_index(
+        op.f("ix_trainer_pokemon_pokemon_id"),
+        "trainer_pokemon",
+        ["pokemon_id"],
+        unique=False,
+    )
+    op.create_index(
+        op.f("ix_trainer_pokemon_trainer_id"),
+        "trainer_pokemon",
+        ["trainer_id"],
+        unique=False,
+    )
 
 
 def downgrade() -> None:

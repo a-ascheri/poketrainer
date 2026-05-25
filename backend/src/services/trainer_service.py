@@ -11,9 +11,7 @@ from src.services.user_service import TRAINER_ROLE, get_password_hash
 def create_trainer(trainer: TrainerCreate, db: Session):
     db_trainer = (
         db.query(User)
-        .filter(
-            (User.username == trainer.username) | (User.email == trainer.email)
-        )
+        .filter((User.username == trainer.username) | (User.email == trainer.email))
         .first()
     )
 
