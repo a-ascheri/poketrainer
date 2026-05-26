@@ -3,7 +3,7 @@ from fastapi import APIRouter
 from src.routes.prefixes import (ADMIN_TRAINER_PREFIX, API_V1_PREFIX,
                                  GAME_TRAINER_PREFIX, SYSTEM_PREFIX)
 
-router = APIRouter(prefix=SYSTEM_PREFIX, tags=["System"])
+router = APIRouter(tags=["System"])
 
 
 @router.get("/")
@@ -12,12 +12,9 @@ def home():
         "message": "¡Bienvenido a Pok-ETrainer!",
         "status": "online",
         "version": "1.0.0",
-        "endpoints": {
+        "system consulting endpoints": {
             "documentation": "/docs",
-            "api_base": API_V1_PREFIX,
-            "health_check": f"{SYSTEM_PREFIX}/health",
-            "admin_trainers": f"{ADMIN_TRAINER_PREFIX}/",
-            "game_trainer": GAME_TRAINER_PREFIX,
+            "health_check": "/health",
         },
     }
 
