@@ -5,8 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "start": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
+    "test": "npm run lint && npm run build",
+    "format": "eslint . --fix",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -17,7 +20,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@types/node": "^24.10.1",
+    "@types/node": "^24.12.4",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
@@ -27,7 +30,7 @@
     "globals": "^17.6.0",
     "sass": "^1.93.3",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.46.4",
+    "typescript-eslint": "^8.60.0",
     "vite": "^8.0.12"
   }
 }

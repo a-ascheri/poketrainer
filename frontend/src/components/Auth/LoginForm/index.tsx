@@ -1,7 +1,7 @@
 import { FormEvent, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { login } from '@services/auth/authService';
-import { useAuth } from '@context/AuthContext';
+import { login } from '../../../services/auth/authService';
+import { useAuth } from '../../../context/AuthContext';
 import './styles.scss';
 
 const LoginForm = () => {

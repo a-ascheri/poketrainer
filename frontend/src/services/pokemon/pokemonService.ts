@@ -1,4 +1,4 @@
-import { pokeApiClient } from '@services/http/client';
+import { pokeApiClient } from '../http/client';
 
 export interface PokemonType {
   name: string;

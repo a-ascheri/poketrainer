@@ -1,6 +1,6 @@
-import { backendClient } from '@services/http/client';
-import { API_ROUTES } from '@services/apiRoutes';
-import { type UserProfile } from '@services/auth/authService';
+import { backendClient } from '../http/client';
+import { API_ROUTES } from '../apiRoutes';
+import { type UserProfile } from '../auth/authService';
 
 export const listUsers = async (): Promise<UserProfile[]> => {
   const response = await backendClient.get<UserProfile[]>(API_ROUTES.admin.users);

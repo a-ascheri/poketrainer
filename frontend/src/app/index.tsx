@@ -1,13 +1,13 @@
 import { type ReactNode } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
-import UserManagement from '@components/Admin/UserManagement';
-import ForcePasswordChange from '@components/Auth/ForcePasswordChange';
-import LoginForm from '@components/Auth/LoginForm';
-import RegisterForm from '@components/Auth/RegisterForm';
-import AppHeader from '@components/Layout/AppHeader';
-import PokemonSearch from '@components/Pokemon/PokemonSearch';
-import StarterSelection from '@components/Trainer/StarterSelection';
-import { useAuth } from '@context/AuthContext';
+import UserManagement from '../components/Admin/UserManagement';
+import ForcePasswordChange from '../components/Auth/ForcePasswordChange';
+import LoginForm from '../components/Auth/LoginForm';
+import RegisterForm from '../components/Auth/RegisterForm';
+import AppHeader from '../components/Layout/AppHeader';
+import PokemonSearch from '../components/Pokemon/PokemonSearch';
+import StarterSelection from '../components/Trainer/StarterSelection';
+import { useAuth } from '../context/AuthContext';
 import './styles.scss';
 
 const RequireAuth = ({ children }: { children: ReactNode }) => {

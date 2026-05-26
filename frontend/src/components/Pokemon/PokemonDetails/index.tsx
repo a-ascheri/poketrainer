@@ -1,4 +1,4 @@
-import { type PokemonData } from '@services/pokemon/pokemonService';
+import { type PokemonData } from '../../../services/pokemon/pokemonService';
 import './styles.scss';
 
 interface PokemonDetailsProps {

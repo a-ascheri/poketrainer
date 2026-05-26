@@ -1,7 +1,7 @@
 import { FormEvent, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { register } from '@services/auth/authService';
-import { setLastUsername } from '@services/auth/authStorage';
+import { register } from '../../../services/auth/authService';
+import { setLastUsername } from '../../../services/auth/authStorage';
 import './styles.scss';
 
 const RegisterForm = () => {

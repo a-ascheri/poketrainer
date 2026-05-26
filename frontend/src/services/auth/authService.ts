@@ -1,5 +1,5 @@
-import { backendClient } from '@services/http/client';
-import { API_ROUTES } from '@services/apiRoutes';
+import { backendClient } from '../http/client';
+import { API_ROUTES } from '../apiRoutes';
 
 export interface LoginPayload {
   username: string;

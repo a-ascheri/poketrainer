@@ -14,12 +14,12 @@ import {
   removeToken,
   setLastUsername,
   setToken,
-} from '@services/auth/authStorage';
+} from '../services/auth/authStorage';
 import {
   changePassword,
   getCurrentUserProfile,
   type UserProfile,
-} from '@services/auth/authService';
+} from '../services/auth/authService';
 
 interface AuthContextValue {
   token: string | null;

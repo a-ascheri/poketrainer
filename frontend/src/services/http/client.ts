@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { getToken } from '@services/auth/authStorage';
+import { getToken } from '../auth/authStorage';
 
 export const backendClient = axios.create({
   baseURL: 'http://localhost:8000',

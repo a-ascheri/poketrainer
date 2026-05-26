@@ -1,7 +1,7 @@
 import { FormEvent, useState } from 'react';
-import PokemonCard from '@components/Pokemon/PokemonCard';
-import PokemonDetails from '@components/Pokemon/PokemonDetails';
-import { searchPokemon, type PokemonData } from '@services/pokemon/pokemonService';
+import PokemonCard from '../PokemonCard';
+import PokemonDetails from '../PokemonDetails';
+import { searchPokemon, type PokemonData } from '../../../services/pokemon/pokemonService';
 import './styles.scss';
 
 const PokemonSearch = () => {

@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
-import { useAuth } from '@context/AuthContext';
+import { useAuth } from '../../../context/AuthContext';
 import {
   getStarterOptions,
   selectStarter,
   type StarterOption,
-} from '@services/trainer/trainerPokemonService';
+} from '../../../services/trainer/trainerPokemonService';
 import './styles.scss';
 
 const StarterSelection = () => {

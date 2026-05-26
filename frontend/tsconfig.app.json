@@ -12,15 +12,6 @@
     "moduleDetection": "force",
     "noEmit": true,
     "jsx": "react-jsx",
-    "baseUrl": "./",
-    "paths": {
-      "@app/*": ["src/app/*"],
-      "@components/*": ["src/components/*"],
-      "@context/*": ["src/context/*"],
-      "@services/*": ["src/services/*"],
-      "@styles/*": ["src/styles/*"],
-      "@assets/*": ["src/assets/*"]
-    },
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,

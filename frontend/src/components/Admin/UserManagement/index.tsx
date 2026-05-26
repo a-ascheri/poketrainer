@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { deleteUser, listUsers, updateUser } from '@services/admin/adminService';
-import { type UserProfile } from '@services/auth/authService';
+import { deleteUser, listUsers, updateUser } from '../../../services/admin/adminService';
+import { type UserProfile } from '../../../services/auth/authService';
 import './styles.scss';
 
 const UserManagement = () => {
