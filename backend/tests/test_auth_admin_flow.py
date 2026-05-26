@@ -3,7 +3,7 @@ from src.models.user import User
 
 def _login(client, username: str, password: str):
     response = client.post(
-        "/login",
+        "/api/v1/user/login",
         data={"username": username, "password": password},
         headers={"Content-Type": "application/x-www-form-urlencoded"},
     )
@@ -21,12 +21,12 @@ def test_initial_admin_must_change_password(client):
     assert login_payload["force_password_change"] is True
 
     denied = client.get(
-        "/admin/users", headers=_auth_headers(login_payload["access_token"])
+        "/api/v1/admin/users", headers=_auth_headers(login_payload["access_token"])
     )
     assert denied.status_code == 403
 
     change_password = client.post(
-        "/users/me/change-password",
+        "/api/v1/user/change-password",
         json={"current_password": "admin123", "new_password": "NewAdmin123!"},
         headers=_auth_headers(login_payload["access_token"]),
     )
@@ -36,7 +36,7 @@ def test_initial_admin_must_change_password(client):
     assert relogin_payload["force_password_change"] is False
 
     visible_admin_api = client.get(
-        "/admin/users", headers=_auth_headers(relogin_payload["access_token"])
+        "/api/v1/admin/users", headers=_auth_headers(relogin_payload["access_token"])
     )
     assert visible_admin_api.status_code == 200
 
@@ -46,7 +46,7 @@ def test_hidden_admin_creation_and_soft_delete(client, db_session):
     token = admin_login["access_token"]
 
     created_trainer = client.post(
-        "/users/",
+        "/api/v1/user/register",
         json={
             "username": "misty",
             "email": "misty@pokemon.com",
@@ -57,7 +57,7 @@ def test_hidden_admin_creation_and_soft_delete(client, db_session):
     trainer_id = created_trainer.json()["id"]
 
     created_admin = client.post(
-        "/internal/admins",
+        "/api/v1/admin/internal/admins",
         json={
             "username": "admin2",
             "email": "admin2@pokemon.com",
@@ -69,7 +69,9 @@ def test_hidden_admin_creation_and_soft_delete(client, db_session):
     assert created_admin.status_code == 200
     assert created_admin.json()["role"] == "admin"
 
-    deleted = client.delete(f"/admin/users/{trainer_id}", headers=_auth_headers(token))
+    deleted = client.delete(
+        f"/api/v1/admin/users/{trainer_id}", headers=_auth_headers(token)
+    )
     assert deleted.status_code == 200
 
     soft_deleted = db_session.query(User).filter(User.id == trainer_id).first()

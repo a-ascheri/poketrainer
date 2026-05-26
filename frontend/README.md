@@ -36,9 +36,14 @@ src/
 ## Variables y Endpoints
 
 - Backend esperado: `http://localhost:8000`
-- Login: `POST /login`
-- Registro: `POST /users/`
+- Base API: `/api/v1`
+- User/Auth: `POST /api/v1/user/login`, `POST /api/v1/user/register`, `GET /api/v1/user/profile`
+- Admin: `GET /api/v1/admin/users`, `PUT /api/v1/admin/users/{id}`, `DELETE /api/v1/admin/users/{id}`
+- Trainer Game: `GET /api/v1/game/trainer/starter/options`, `POST /api/v1/game/trainer/starter/select`
+- System: `GET /api/v1/system/health`
 - Pokemons: `https://pokeapi.co/api/v2/pokemon/{nameOrId}`
+
+Las rutas del backend se centralizan en `src/services/apiRoutes.ts` para evitar hardcodes y mantener trazabilidad entre frontend y backend.
 
 ## Flujo inicial
 

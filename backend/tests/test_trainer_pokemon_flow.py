@@ -76,7 +76,7 @@ def pokeapi_mock(monkeypatch):
 
 def test_starter_selection_and_gain_exp(client):
     register_response = client.post(
-        "/users/",
+        "/api/v1/user/register",
         json={
             "username": "brock",
             "email": "brock@pokemon.com",
@@ -86,19 +86,21 @@ def test_starter_selection_and_gain_exp(client):
     assert register_response.status_code == 200
 
     login_response = client.post(
-        "/login",
+        "/api/v1/user/login",
         data={"username": "brock", "password": "rock123"},
         headers={"Content-Type": "application/x-www-form-urlencoded"},
     )
     assert login_response.status_code == 200
     token = login_response.json()["access_token"]
 
-    options = client.get("/trainer/starter/options", headers=_auth_headers(token))
+    options = client.get(
+        "/api/v1/game/trainer/starter/options", headers=_auth_headers(token)
+    )
     assert options.status_code == 200
     assert len(options.json()) == 3
 
     selected = client.post(
-        "/trainer/starter/select",
+        "/api/v1/game/trainer/starter/select",
         json={"pokemon_name": "bulbasaur"},
         headers=_auth_headers(token),
     )
@@ -106,7 +108,7 @@ def test_starter_selection_and_gain_exp(client):
     trainer_pokemon_id = selected.json()["id"]
 
     gained = client.post(
-        f"/trainer/pokemon/{trainer_pokemon_id}/gain-exp",
+        f"/api/v1/game/trainer/pokemon/{trainer_pokemon_id}/gain-exp",
         json={"amount": 2000},
         headers=_auth_headers(token),
     )
@@ -114,14 +116,14 @@ def test_starter_selection_and_gain_exp(client):
     assert gained.json()["current_level"] > 5
 
     stats = client.get(
-        f"/trainer/pokemon/{trainer_pokemon_id}/stats",
+        f"/api/v1/game/trainer/pokemon/{trainer_pokemon_id}/stats",
         headers=_auth_headers(token),
     )
     assert stats.status_code == 200
     assert stats.json()["max_hp"] >= stats.json()["current_hp"]
 
     moves = client.get(
-        f"/trainer/pokemon/{trainer_pokemon_id}/moves",
+        f"/api/v1/game/trainer/pokemon/{trainer_pokemon_id}/moves",
         headers=_auth_headers(token),
     )
     assert moves.status_code == 200

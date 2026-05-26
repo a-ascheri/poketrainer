@@ -2,7 +2,8 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from src.database.database import get_db
-from src.routes.user import require_trainer
+from src.routes.auth_dependencies import require_trainer
+from src.routes.prefixes import GAME_TRAINER_PREFIX
 from src.schemas.pokemon import (GainExperienceInput, PokemonMovesRead,
                                  PokemonStatsRead, StarterSelectionInput,
                                  TrainerPokemonRead)
@@ -12,14 +13,14 @@ from src.services.pokemon_service import (acquire_pokemon, gain_experience,
                                           list_starters,
                                           select_starter_pokemon)
 
-router = APIRouter(prefix="/trainer", tags=["Trainer-Pokemon"])
+router = APIRouter(prefix=GAME_TRAINER_PREFIX, tags=["Trainer"])
 
 
 @router.get(
     "/starter/options",
     response_model=list[dict],
 )
-def starter_options_route(
+def starter_options(
     db: Session = Depends(get_db),
     trainer=Depends(require_trainer),
 ):
@@ -44,7 +45,7 @@ def starter_options_route(
     "/starter/select",
     response_model=TrainerPokemonRead,
 )
-def starter_select_route(
+def select_starter(
     payload: StarterSelectionInput,
     db: Session = Depends(get_db),
     trainer=Depends(require_trainer),
@@ -67,7 +68,7 @@ def starter_select_route(
     "/pokemon/acquire/{pokeapi_id}",
     response_model=TrainerPokemonRead,
 )
-def acquire_pokemon_route(
+def acquire_pokemon_for_trainer(
     pokeapi_id: int,
     db: Session = Depends(get_db),
     trainer=Depends(require_trainer),
@@ -90,7 +91,7 @@ def acquire_pokemon_route(
     "/pokemon/{pokemon_id}/gain-exp",
     response_model=TrainerPokemonRead,
 )
-def gain_exp_route(
+def gain_experience_for_pokemon(
     pokemon_id: int,
     payload: GainExperienceInput,
     db: Session = Depends(get_db),
@@ -115,7 +116,7 @@ def gain_exp_route(
     "/pokemon/{pokemon_id}/stats",
     response_model=PokemonStatsRead,
 )
-def stats_route(
+def get_pokemon_stats(
     pokemon_id: int,
     db: Session = Depends(get_db),
     trainer=Depends(require_trainer),
@@ -151,7 +152,7 @@ def stats_route(
     "/pokemon/{pokemon_id}/moves",
     response_model=PokemonMovesRead,
 )
-def moves_route(
+def get_pokemon_moves(
     pokemon_id: int,
     db: Session = Depends(get_db),
     trainer=Depends(require_trainer),

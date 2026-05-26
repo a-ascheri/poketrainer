@@ -3,29 +3,26 @@ import time
 
 from authlib.oauth2.rfc7636 import create_s256_code_challenge
 from fastapi import APIRouter, Depends, Form, HTTPException
-from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 
-from src.services.jwt import create_access_token, verify_access_token
-from src.services.user_service import (ADMIN_ROLE, TRAINER_ROLE,
-                                       authenticate_user, change_password,
-                                       create_admin_user)
+from src.routes.auth_dependencies import get_current_user_entity
+from src.routes.prefixes import USER_PREFIX
+from src.services.jwt import create_access_token
+from src.services.user_service import authenticate_user, change_password
 from src.services.user_service import create_user as create_user_service
-from src.services.user_service import get_user_by_id
 
 from ..database.database import get_db
-from ..schemas.user import (AdminCreate, ChangePasswordInput, LoginResponse,
-                            UserCreate, UserRead)
+from ..schemas.user import (ChangePasswordInput, LoginResponse, UserCreate,
+                            UserRead)
 
 # Almacenamiento temporal de códigos de autorización (en memoria, solo para demo)
 # en desarrollo usar una base de datos o caché como Redis
 authorization_codes = {}
-router = APIRouter(tags=["User"])
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token")
+router = APIRouter(prefix=USER_PREFIX, tags=["User"])
 
 
-@router.post("/users/", response_model=UserRead)
-def create_user_route(user: UserCreate, db: Session = Depends(get_db)):
+@router.post("/register", response_model=UserRead)
+def create_user(user: UserCreate, db: Session = Depends(get_db)):
     """
     Crea un usuario con rol trainer para acceso al juego.
 
@@ -78,7 +75,6 @@ async def authorize(
         "code_challenge_method": code_challenge_method,
         "expires_at": time.time() + 600,  # 10 minutos
     }
-    url = f"{redirect_uri}?code={code}&state=xyz"
     return {"code": code, "redirect_uri": redirect_uri, "state": "xyz"}
 
 
@@ -163,50 +159,10 @@ def login(
     )
 
 
-def get_current_user(token: str = Depends(oauth2_scheme)):
-    payload = verify_access_token(token)
-
-    if not payload:
-        raise HTTPException(status_code=401, detail="Token inválido o expirado")
-    return payload
-
-
-def get_current_user_entity(
-    payload: dict = Depends(get_current_user), db: Session = Depends(get_db)
-):
-    user_id = payload.get("sub")
-    if not user_id:
-        raise HTTPException(status_code=401, detail="Token inválido")
-
-    return get_user_by_id(int(user_id), db)
-
-
-def require_admin(current_user=Depends(get_current_user_entity)):
-    if current_user.force_password_change:
-        raise HTTPException(
-            status_code=403,
-            detail="Password change required before using admin endpoints",
-        )
-    if current_user.role != ADMIN_ROLE:
-        raise HTTPException(status_code=403, detail="Admin role required")
-    return current_user
-
-
-def require_trainer(current_user=Depends(get_current_user_entity)):
-    if current_user.force_password_change:
-        raise HTTPException(
-            status_code=403,
-            detail="Password change required before using trainer endpoints",
-        )
-    if current_user.role != TRAINER_ROLE:
-        raise HTTPException(status_code=403, detail="Trainer role required")
-    return current_user
-
-
 @router.post(
-    "/users/me/change-password",
+    "/change-password",
 )
-def change_password_route(
+def change_password_for_current_user(
     payload: ChangePasswordInput,
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user_entity),
@@ -226,10 +182,10 @@ def change_password_route(
 
 
 @router.get(
-    "/users/me",
+    "/profile",
     response_model=UserRead,
 )
-def current_user_profile(current_user=Depends(get_current_user_entity)):
+def get_profile(current_user=Depends(get_current_user_entity)):
     """
     Devuelve el perfil del usuario autenticado para control de rol y onboarding.
 
@@ -242,21 +198,3 @@ def current_user_profile(current_user=Depends(get_current_user_entity)):
     return current_user
 
 
-@router.post("/internal/admins", response_model=UserRead, include_in_schema=False)
-def create_admin_route(
-    payload: AdminCreate,
-    db: Session = Depends(get_db),
-    admin=Depends(require_admin),
-):
-    """
-    Crea un usuario administrador (solo uso interno).
-
-    Args:
-        payload (AdminCreate): Datos del admin a crear.
-        db (Session): Sesión de base de datos.
-        admin: Dependencia para requerir permisos de administrador.
-
-    Returns:
-        UserRead: Admin creado.
-    """
-    return create_admin_user(payload, db)

@@ -1,4 +1,5 @@
 import { backendClient } from '@services/http/client';
+import { API_ROUTES } from '@services/apiRoutes';
 
 export interface LoginPayload {
   username: string;
@@ -35,7 +36,7 @@ export const login = async (payload: LoginPayload): Promise<TokenResponse> => {
     password: payload.password,
   });
 
-  const response = await backendClient.post<TokenResponse>('/login', body, {
+  const response = await backendClient.post<TokenResponse>(API_ROUTES.user.login, body, {
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
   });
 
@@ -43,11 +44,11 @@ export const login = async (payload: LoginPayload): Promise<TokenResponse> => {
 };
 
 export const register = async (payload: RegisterPayload): Promise<void> => {
-  await backendClient.post('/users/', payload);
+  await backendClient.post(API_ROUTES.user.register, payload);
 };
 
 export const getCurrentUserProfile = async (): Promise<UserProfile> => {
-  const response = await backendClient.get<UserProfile>('/users/me');
+  const response = await backendClient.get<UserProfile>(API_ROUTES.user.profile);
   return response.data;
 };
 
@@ -55,7 +56,7 @@ export const changePassword = async (
   currentPassword: string,
   newPassword: string,
 ): Promise<void> => {
-  await backendClient.post('/users/me/change-password', {
+  await backendClient.post(API_ROUTES.user.changePassword, {
     current_password: currentPassword,
     new_password: newPassword,
   });

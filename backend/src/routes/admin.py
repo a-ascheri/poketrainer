@@ -2,12 +2,14 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from src.database.database import get_db
-from src.routes.user import require_admin
-from src.schemas.user import UserRead, UserUpdate
-from src.services.user_service import (get_user_by_id, list_users,
-                                       soft_delete_user, update_user)
+from src.routes.auth_dependencies import require_admin
+from src.routes.prefixes import ADMIN_PREFIX
+from src.schemas.user import AdminCreate, UserRead, UserUpdate
+from src.services.user_service import (create_admin_user, get_user_by_id,
+                                       list_users, soft_delete_user,
+                                       update_user)
 
-router = APIRouter(prefix="/admin", tags=["Admin"])
+router = APIRouter(prefix=ADMIN_PREFIX, tags=["Admin"])
 
 
 @router.get(
@@ -99,3 +101,23 @@ def admin_delete_user(
         UserRead: Usuario desactivado.
     """
     return soft_delete_user(user_id, db)
+
+
+@router.post("/internal/admins", response_model=UserRead, include_in_schema=False)
+def create_admin(
+    payload: AdminCreate,
+    db: Session = Depends(get_db),
+    admin=Depends(require_admin),
+):
+    """
+    Crea un usuario administrador para bootstrap interno.
+
+    Args:
+        payload (AdminCreate): Datos del admin a crear.
+        db (Session): Sesion de base de datos.
+        admin: Dependencia para requerir permisos de administrador.
+
+    Returns:
+        UserRead: Admin creado.
+    """
+    return create_admin_user(payload, db)

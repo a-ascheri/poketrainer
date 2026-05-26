@@ -1,6 +1,9 @@
 from fastapi import APIRouter
 
-router = APIRouter(tags=["System"])
+from src.routes.prefixes import (ADMIN_TRAINER_PREFIX, API_V1_PREFIX,
+                                 GAME_TRAINER_PREFIX, SYSTEM_PREFIX)
+
+router = APIRouter(prefix=SYSTEM_PREFIX, tags=["System"])
 
 
 @router.get("/")
@@ -11,8 +14,10 @@ def home():
         "version": "1.0.0",
         "endpoints": {
             "documentation": "/docs",
-            "health_check": "/health",
-            "trainers": "/trainers/",
+            "api_base": API_V1_PREFIX,
+            "health_check": f"{SYSTEM_PREFIX}/health",
+            "admin_trainers": f"{ADMIN_TRAINER_PREFIX}/",
+            "game_trainer": GAME_TRAINER_PREFIX,
         },
     }
 

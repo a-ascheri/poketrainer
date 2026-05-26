@@ -25,13 +25,21 @@ Proyecto de pruebas usando la PokeAPI.
   - username: `originadmin`
   - password: `admin123`
 - El admin inicial debe cambiar password en el primer login.
-- Los endpoints para crear admins son internos y ocultos en Swagger (`/internal/admins`).
+- Los endpoints para crear admins son internos y ocultos en Swagger (`/api/v1/admin/internal/admins`).
 - Borrado lógico (soft delete) para usuarios/admins.
 
 ## Flujo trainer
-- Registro público por `/users/`.
+- Registro público por `/api/v1/user/register`.
 - Primer login: selección obligatoria de starter (Bulbasaur, Charmander, Squirtle).
-- Gestión de experiencia y progresión de Pokémon mediante endpoints `/trainer/*`.
+- Gestión de experiencia y progresión de Pokémon mediante endpoints `/api/v1/game/trainer/*`.
+
+## API versionada por dominio
+- Base API: `/api/v1`
+- User: `/api/v1/user/*` (registro, login, perfil, cambio de contraseña)
+- Admin: `/api/v1/admin/*` (gestión administrativa y endpoints internos)
+- Admin Trainer Management: `/api/v1/admin/trainers/*`
+- Trainer Game: `/api/v1/game/trainer/*` (starter, captura, stats, experiencia)
+- System: `/api/v1/system/*` (estado y healthcheck)
 
 ## Tests
 - Backend:

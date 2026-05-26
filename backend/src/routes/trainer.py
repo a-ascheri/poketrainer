@@ -1,18 +1,21 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from src.routes.user import require_admin
+from src.routes.auth_dependencies import require_admin
+from src.routes.prefixes import ADMIN_TRAINER_PREFIX
 from src.schemas.trainer import TrainerCreate, TrainerRead, TrainerUpdate
-from src.services.trainer_service import (create_trainer, delete_trainer,
-                                          list_trainers, update_trainer)
+from src.services.trainer_service import (create_trainer as create_trainer_service,
+                                          delete_trainer as delete_trainer_service,
+                                          list_trainers as list_trainers_service,
+                                          update_trainer as update_trainer_service)
 
 from ..database.database import get_db
 
-router = APIRouter(tags=["Trainer"])
+router = APIRouter(prefix=ADMIN_TRAINER_PREFIX, tags=["Admin"])
 
 
-@router.post("/trainers/", response_model=TrainerRead)
-def create_trainer_route(
+@router.post("/", response_model=TrainerRead)
+def create_trainer(
     trainer: TrainerCreate,
     db: Session = Depends(get_db),
     admin=Depends(require_admin),
@@ -28,11 +31,11 @@ def create_trainer_route(
     Returns:
         TrainerRead: Entrenador creado.
     """
-    return create_trainer(trainer, db)
+    return create_trainer_service(trainer, db)
 
 
-@router.get("/trainers/", response_model=list[TrainerRead])
-def list_trainers_route(db: Session = Depends(get_db), admin=Depends(require_admin)):
+@router.get("/", response_model=list[TrainerRead])
+def list_trainers(db: Session = Depends(get_db), admin=Depends(require_admin)):
     """
     Lista todos los entrenadores registrados en el sistema.
 
@@ -43,11 +46,11 @@ def list_trainers_route(db: Session = Depends(get_db), admin=Depends(require_adm
     Returns:
         list[TrainerRead]: Lista de entrenadores.
     """
-    return list_trainers(db)
+    return list_trainers_service(db)
 
 
-@router.put("/trainers/{trainer_id}", response_model=TrainerRead)
-def update_trainer_route(
+@router.put("/{trainer_id}", response_model=TrainerRead)
+def update_trainer(
     trainer_id: int,
     trainer_update: TrainerUpdate,
     db: Session = Depends(get_db),
@@ -65,11 +68,11 @@ def update_trainer_route(
     Returns:
         TrainerRead: Entrenador actualizado.
     """
-    return update_trainer(trainer_id, trainer_update, db)
+    return update_trainer_service(trainer_id, trainer_update, db)
 
 
-@router.delete("/trainers/{trainer_id}")
-def delete_trainer_route(
+@router.delete("/{trainer_id}")
+def delete_trainer(
     trainer_id: int, db: Session = Depends(get_db), admin=Depends(require_admin)
 ):
     """
@@ -83,4 +86,4 @@ def delete_trainer_route(
     Returns:
         TrainerRead: Entrenador eliminado.
     """
-    return delete_trainer(trainer_id, db)
+    return delete_trainer_service(trainer_id, db)
