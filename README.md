@@ -20,6 +20,24 @@ Proyecto de pruebas usando la PokeAPI.
    npm install
    npm run dev
 
+## Pruebas publicas seguras (ngrok)
+1. Levanta backend y frontend localmente.
+2. Deja `frontend/.env` con esta base URL para local:
+  VITE_API_BASE_URL=http://localhost:8000
+3. Crea un tunel para frontend (5173):
+  ngrok http 5173 --basic-auth "usuario:password-fuerte"
+4. Crea un tunel para backend (8000):
+  ngrok http 8000 --basic-auth "usuario:password-fuerte"
+5. Para prueba publica, cambia temporalmente `frontend/.env` a la URL publica del backend:
+  VITE_API_BASE_URL=https://TU-BACKEND.ngrok-free.app
+6. Reinicia frontend despues de cambiar `.env`.
+
+Notas:
+- Usa credenciales fuertes y compartelas por un canal seguro.
+- No dejes los tuneles abiertos mas tiempo del necesario.
+- Para mayor seguridad, ngrok soporta OAuth (`--oauth google`) en lugar de basic auth.
+- Con `allowedHosts` configurado para `.ngrok-free.app`, no hace falta editar `vite.config.ts` cada vez que cambie la URL de ngrok del frontend.
+
 ## Seguridad y roles
 - Se crea automáticamente un admin inicial:
   - username: `originadmin`

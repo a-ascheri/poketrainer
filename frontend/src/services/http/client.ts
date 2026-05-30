@@ -1,8 +1,11 @@
 import axios from 'axios';
 import { getToken } from '../auth/authStorage';
 
+const backendBaseUrl =
+  import.meta.env.VITE_API_BASE_URL?.trim() || '';
+
 export const backendClient = axios.create({
-  baseURL: 'http://localhost:8000',
+  baseURL: backendBaseUrl,
 });
 
 export const pokeApiClient = axios.create({

@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from src.config import settings
 from src.database.database import SessionLocal, setup_engine
 from src.routes.admin import router as admin_router
 from src.routes.system import router as system_router
@@ -61,10 +62,13 @@ app = FastAPI(
     openapi_tags=openapi_tags,
 )
 
+cors_origins = [origin.strip() for origin in settings.CORS_ORIGINS.split(",") if origin.strip()]
+
 # Habilitar CORS para el frontend en desarrollo
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],  # Cambiar esto en producción
+    allow_origins=cors_origins,
+    allow_origin_regex=settings.CORS_ORIGIN_REGEX,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
