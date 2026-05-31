@@ -12,13 +12,14 @@ export interface DpadState {
 interface PhaserGameProps {
   width: number;
   height: number;
+  initMapKey?: string;
   initTileX?: number;
   initTileY?: number;
-  onSave?: (tileX: number, tileY: number) => void;
+  onSave?: (tileX: number, tileY: number, mapKey: string) => void;
   dpadState?: DpadState;
 }
 
-export default function PhaserGame({ width, height, initTileX, initTileY, onSave, dpadState }: PhaserGameProps) {
+export default function PhaserGame({ width, height, initMapKey, initTileX, initTileY, onSave, dpadState }: PhaserGameProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const gameRef = useRef<Phaser.Game | null>(null);
   // Keep onSave up-to-date without restarting Phaser on each render
@@ -44,9 +45,10 @@ export default function PhaserGame({ width, height, initTileX, initTileY, onSave
       callbacks: {
         postBoot: (game) => {
           game.scene.add('WorldScene', WorldScene, true, {
-            tileX: initTileX ?? 20,
-            tileY: initTileY ?? 20,
-            onSave: (x: number, y: number) => onSaveRef.current?.(x, y),
+            mapKey: initMapKey ?? 'pallet_town',
+            tileX: initTileX ?? 5,
+            tileY: initTileY ?? 7,
+            onSave: (x: number, y: number, mk: string) => onSaveRef.current?.(x, y, mk),
             dpad: dpadState,
           });
         },

@@ -24,8 +24,8 @@ export default function GameShell() {
   const [status, setStatus] = useState<GameStatus>('off');
   const [saveData, setSaveData] = useState<GameSave | null>(null);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'error'>('idle');
-  /** Last known player position, updated every autosave tick. */
-  const lastKnownPosRef = useRef({ tileX: 20, tileY: 20 });
+  /** Last known player position + map, updated every autosave tick. */
+  const lastKnownPosRef = useRef({ tileX: 5, tileY: 7, mapKey: 'pallet_town' });
   /** Shared dpad state object — Phaser reads this in update(). Stable reference. */
   const dpadRef = useRef<DpadReactive>({ up: false, down: false, left: false, right: false });
   /** Tracks which arrow keys are currently held (for visual highlight). */
@@ -35,7 +35,7 @@ export default function GameShell() {
   useEffect(() => {
     gameService.loadSave().then((s) => {
       setSaveData(s);
-      lastKnownPosRef.current = { tileX: s.tile_x ?? 20, tileY: s.tile_y ?? 20 };
+      lastKnownPosRef.current = { tileX: s.tile_x ?? 5, tileY: s.tile_y ?? 7, mapKey: s.map_id ?? 'pallet_town' };
     }).catch(() => {
       setSaveData(null);
     });
@@ -83,8 +83,9 @@ export default function GameShell() {
     if (!saveData) return;
     setSaveStatus('saving');
     try {
-      const { tileX, tileY } = lastKnownPosRef.current;
+      const { tileX, tileY, mapKey } = lastKnownPosRef.current;
       const updated = await gameService.saveGame({
+        map_id: mapKey,
         tile_x: tileX,
         tile_y: tileY,
         play_time_seconds: (saveData.play_time_seconds ?? 0) + 1,
@@ -99,9 +100,9 @@ export default function GameShell() {
   const handleShutdown = useCallback(async () => {
     // Save current position then power off
     if (saveData) {
-      const { tileX, tileY } = lastKnownPosRef.current;
+      const { tileX, tileY, mapKey } = lastKnownPosRef.current;
       try {
-        await gameService.saveGame({ tile_x: tileX, tile_y: tileY });
+        await gameService.saveGame({ map_id: mapKey, tile_x: tileX, tile_y: tileY });
       } catch {
         // Don't block shutdown on save error
       }
@@ -149,13 +150,14 @@ export default function GameShell() {
               <PhaserGame
                 width={GAME_WIDTH}
                 height={GAME_HEIGHT}
-                initTileX={saveData?.tile_x ?? 20}
-                initTileY={saveData?.tile_y ?? 20}
+                initMapKey={saveData?.map_id ?? 'pallet_town'}
+                initTileX={saveData?.tile_x ?? 5}
+                initTileY={saveData?.tile_y ?? 7}
                 dpadState={dpadRef.current}
-                onSave={async (tileX, tileY) => {
-                  lastKnownPosRef.current = { tileX, tileY };
+                onSave={async (tileX, tileY, mapKey) => {
+                  lastKnownPosRef.current = { tileX, tileY, mapKey };
                   try {
-                    const updated = await gameService.saveGame({ tile_x: tileX, tile_y: tileY });
+                    const updated = await gameService.saveGame({ map_id: mapKey, tile_x: tileX, tile_y: tileY });
                     setSaveData(updated);
                   } catch {
                     // silent autosave failure
