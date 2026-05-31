@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from src.config import settings
 from src.database.database import SessionLocal, setup_engine
 from src.routes.admin import router as admin_router
+from src.routes.game import router as game_router
 from src.routes.system import router as system_router
 from src.routes.trainer import router as trainer_router
 from src.routes.trainer_pokemon import router as trainer_pokemon_router
@@ -27,6 +28,13 @@ async def lifespan(app: FastAPI):
 
 # Constructor principa, Nombre en /docs, Descripción, Versión de la API
 openapi_tags = [
+    {
+        "name": "Game",
+        "description": (
+            "Endpoints de estado de juego: partida guardada, posición en el mundo,"
+            " party activa e inventario del entrenador."
+        ),
+    },
     {
         "name": "Admin",
         "description": (
@@ -78,4 +86,5 @@ app.include_router(user_router)
 app.include_router(trainer_router)
 app.include_router(admin_router)
 app.include_router(trainer_pokemon_router)
+app.include_router(game_router)
 app.include_router(system_router)

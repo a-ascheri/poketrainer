@@ -9,9 +9,11 @@ const PokemonSearch = () => {
   const [pokemon, setPokemon] = useState<PokemonData | null>(null);
   const [error, setError] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
+    setIsOpen(true);
     setError('');
     setIsLoading(true);
 
@@ -28,27 +30,39 @@ const PokemonSearch = () => {
 
   return (
     <section className="search-panel">
-      <h2>Buscador Pokémon</h2>
-      <p>Usá nombre o ID para ver stats, tipos e imagen oficial.</p>
+      <button
+        className="search-panel__toggle"
+        type="button"
+        onClick={() => setIsOpen((o) => !o)}
+      >
+        <span>Pokédex</span>
+        <span className={`search-panel__chevron${isOpen ? ' search-panel__chevron--open' : ''}`}>▼</span>
+      </button>
 
-      <form className="search-panel__form" onSubmit={handleSubmit}>
-        <input
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-          placeholder="Ej: charizard o 6"
-          required
-        />
-        <button type="submit" disabled={isLoading}>
-          {isLoading ? 'Buscando...' : 'Buscar'}
-        </button>
-      </form>
+      {isOpen && (
+        <div className="search-panel__body">
+          <p className="search-panel__subtitle">Introduce nombre o ID para ver stats</p>
 
-      {error && <p className="search-panel__error">{error}</p>}
+          <form className="search-panel__form" onSubmit={handleSubmit}>
+            <input
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Ej: charizard o 6"
+              required
+            />
+            <button type="submit" disabled={isLoading}>
+              {isLoading ? 'Buscando...' : 'Buscar'}
+            </button>
+          </form>
 
-      {pokemon && (
-        <div className="search-panel__result">
-          <PokemonCard pokemon={pokemon} />
-          <PokemonDetails pokemon={pokemon} />
+          {error && <p className="search-panel__error">{error}</p>}
+
+          {pokemon && (
+            <div className="search-panel__result">
+              <PokemonCard pokemon={pokemon} />
+              <PokemonDetails pokemon={pokemon} />
+            </div>
+          )}
         </div>
       )}
     </section>

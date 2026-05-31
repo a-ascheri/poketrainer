@@ -29,3 +29,4 @@ class TrainerPokemon(Base):
 
     trainer = relationship("User", back_populates="trainer_pokemons")
     pokemon = relationship("Pokemon", back_populates="trainer_pokemons")
+    party_slots = relationship("TrainerPartySlot", back_populates="trainer_pokemon")

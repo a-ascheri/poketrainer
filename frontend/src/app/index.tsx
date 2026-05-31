@@ -5,9 +5,9 @@ import ForcePasswordChange from '../components/Auth/ForcePasswordChange';
 import LoginForm from '../components/Auth/LoginForm';
 import RegisterForm from '../components/Auth/RegisterForm';
 import AppHeader from '../components/Layout/AppHeader';
-import PokemonSearch from '../components/Pokemon/PokemonSearch';
 import StarterSelection from '../components/Trainer/StarterSelection';
 import { useAuth } from '../context/AuthContext';
+import TrainerHome from './TrainerHome';
 import './styles.scss';
 
 const RequireAuth = ({ children }: { children: ReactNode }) => {
@@ -90,7 +90,7 @@ function App() {
             element={
               <RequireAuth>
                 {profile?.role === 'trainer' && profile.starter_pokemon_selected ? (
-                  <PokemonSearch />
+                  <TrainerHome />
                 ) : (
                   <Navigate to={redirectByProfile()} replace />
                 )}

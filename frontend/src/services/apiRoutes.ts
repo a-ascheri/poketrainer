@@ -2,6 +2,7 @@ export const API_V1 = '/api/v1';
 
 export const ADMIN = `${API_V1}/admin`;
 export const TRAINER = `${API_V1}/game/trainer`;
+export const GAME = `${API_V1}/game`;
 export const USER = `${API_V1}/user`;
 export const SYSTEM = `${API_V1}/system`;
 
@@ -30,5 +31,9 @@ export const API_ROUTES = {
   system: {
     home: `${SYSTEM}/`,
     health: `${SYSTEM}/health`,
+  },
+  game: {
+    save: `${GAME}/save`,
+    partySlot: (slotPosition: number) => `${GAME}/save/party/${slotPosition}`,
   },
 } as const;

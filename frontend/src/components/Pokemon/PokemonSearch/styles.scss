@@ -4,42 +4,76 @@
   border-radius: 18px;
   margin: 0 auto;
   max-width: 1040px;
-  padding: 1.4rem;
 }
 
-.search-panel h2 {
+/* ── Toggle button ───────────────────────────────────────────────── */
+.search-panel__toggle {
+  align-items: center;
+  background: transparent;
+  border: none;
+  border-radius: 18px;
   color: #fff;
-  margin: 0;
+  cursor: pointer;
+  display: flex;
+  font-family: 'Press Start 2P', monospace, sans-serif;
+  font-size: 11px;
+  gap: 10px;
+  justify-content: space-between;
+  letter-spacing: 2px;
+  padding: 1.2rem 1.4rem;
+  text-transform: uppercase;
+  transition: background 120ms;
+  width: 100%;
+
+  &:hover { background: rgba(255, 255, 255, 0.04); }
 }
 
-.search-panel p {
+.search-panel__chevron {
+  color: #5a5a80;
+  display: inline-block;
+  font-size: 9px;
+  transition: transform 200ms;
+
+  &--open { transform: rotate(180deg); }
+}
+
+/* ── Collapsible body ────────────────────────────────────────────── */
+.search-panel__body {
+  border-top: 1px solid #2a2a3e;
+  padding: 1rem 1.4rem 1.4rem;
+}
+
+.search-panel__subtitle {
   color: #d2d2d2;
   margin-bottom: 1rem;
-  margin-top: 0.45rem;
+  margin-top: 0;
 }
 
+/* ── Form ────────────────────────────────────────────────────────── */
 .search-panel__form {
   display: grid;
   gap: 0.6rem;
   grid-template-columns: 1fr 160px;
   margin-bottom: 1rem;
-}
 
-.search-panel__form input {
-  background: #0d0d0d;
-  border: 1px solid #525252;
-  border-radius: 10px;
-  color: #fff;
-  padding: 0.72rem 0.8rem;
-}
+  input {
+    background: #0d0d0d;
+    border: 1px solid #525252;
+    border-radius: 10px;
+    color: #fff;
+    padding: 0.72rem 0.8rem;
+  }
 
-.search-panel__form button {
-  background: #fff;
-  border: none;
-  border-radius: 10px;
-  color: #101010;
-  cursor: pointer;
-  font-weight: 800;
+  button {
+    background: #fff;
+    border: none;
+    border-radius: 10px;
+    color: #101010;
+    cursor: pointer;
+    font-weight: 800;
+
+    &:disabled { cursor: not-allowed; filter: brightness(0.5); }
+  }
 }
 
 .search-panel__error {

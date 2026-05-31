@@ -1,0 +1,276 @@
+/* ------------------------------------------------------------------ */
+/*  GameShell – Rectangular Game Boy-inspired device                   */
+/* ------------------------------------------------------------------ */
+
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+.game-shell {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  padding: 2rem 1rem 3rem;
+}
+
+/* ── Device body ─────────────────────────────────────────────────── */
+.game-device {
+  background: linear-gradient(175deg, #23233a 0%, #16162a 60%, #1a1428 100%);
+  border: 2px solid #3a3a5c;
+  border-radius: 16px;
+  box-shadow:
+    0 12px 48px rgba(0, 0, 0, 0.7),
+    inset 0 2px 0 rgba(255, 255, 255, 0.04),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.4);
+  padding: 20px 24px 28px;
+  position: relative;
+  width: 380px;
+}
+
+/* ── Screen bezel ─────────────────────────────────────────────────── */
+.game-device__bezel {
+  background: #0a0a14;
+  border: 3px solid #0d0d1f;
+  border-radius: 8px;
+  box-shadow:
+    inset 0 3px 12px rgba(0, 0, 0, 0.9),
+    0 0 0 1px #252548;
+  margin-bottom: 20px;
+  overflow: hidden;
+  position: relative;
+}
+
+/* ── OFF screen ─────────────────────────────────────────────────── */
+.game-device__screen--off {
+  align-items: center;
+  background: #050508;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  height: 320px;
+  justify-content: center;
+  width: 100%;
+
+  .game-device__screen-dot {
+    animation: pulse-dot 2.4s ease-in-out infinite;
+    background: radial-gradient(circle, #5050a0, #2a2a55);
+    border-radius: 50%;
+    height: 8px;
+    width: 8px;
+  }
+
+  .game-device__screen-label {
+    color: #2a2a55;
+    font-family: 'Press Start 2P', monospace, sans-serif;
+    font-size: 9px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+  }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 0.2; }
+  50%       { opacity: 0.8; }
+}
+
+/* ── Active screen (Phaser canvas) ──────────────────────────────── */
+.game-device__screen--active {
+  display: block;
+  height: 320px;
+  line-height: 0;
+  position: relative;
+  width: 100%;
+
+  canvas {
+    display: block;
+    height: 320px !important;
+    image-rendering: pixelated;
+    width: 100% !important;
+  }
+}
+
+/* ── D-pad overlay ───────────────────────────────────────────────── */
+.game-device__dpad-overlay {
+  bottom: 14px;
+  display: grid;
+  grid-template-areas:
+    ".    up    ."
+    "left center right"
+    ".    down  .";
+  grid-template-columns: repeat(3, 36px);
+  grid-template-rows: repeat(3, 36px);
+  pointer-events: auto;
+  position: absolute;
+  right: 14px;
+  touch-action: none;
+  user-select: none;
+}
+
+.dpad-btn {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(2px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.65);
+  cursor: pointer;
+  display: flex;
+  font-size: 12px;
+  justify-content: center;
+  padding: 0;
+  transition: background 80ms, color 80ms;
+
+  &:active,
+  &.dpad-btn--active {
+    background: rgba(255, 255, 255, 0.35);
+    color: #fff;
+  }
+
+  &--up    { grid-area: up; }
+  &--left  { grid-area: left; }
+  &--right { grid-area: right; }
+  &--down  { grid-area: down; }
+}
+
+.dpad-center {
+  grid-area: center;
+}
+
+/* ── Brand strip ─────────────────────────────────────────────────── */
+.game-device__brand {
+  color: #444468;
+  display: block;
+  font-family: 'Press Start 2P', monospace, sans-serif;
+  font-size: 6px;
+  letter-spacing: 5px;
+  margin-bottom: 16px;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+/* ── Controls row ─────────────────────────────────────────────────── */
+.game-device__controls {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* START / CONTINUE button */
+.game-device__start-btn {
+  background: linear-gradient(180deg, #7c4dff 0%, #5b2de8 100%);
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 4px 0 #3a1aaa, 0 6px 18px rgba(92, 45, 232, 0.45);
+  color: #fff;
+  cursor: pointer;
+  font-family: 'Press Start 2P', monospace, sans-serif;
+  font-size: 11px;
+  letter-spacing: 2px;
+  padding: 12px 40px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  transition: transform 80ms, box-shadow 80ms;
+
+  &:hover  { background: linear-gradient(180deg, #8f60ff 0%, #6b3ef5 100%); }
+  &:active { box-shadow: 0 2px 0 #3a1aaa; transform: translateY(2px); }
+  &:disabled { cursor: not-allowed; filter: brightness(0.5); transform: none; }
+}
+
+/* ── SAVE + SHUT DOWN button group ──────────────────────────────── */
+.game-device__action-buttons {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.game-device__save-btn {
+  background: linear-gradient(180deg, #00b894 0%, #00916e 100%);
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 4px 0 #006b51, 0 6px 16px rgba(0, 185, 148, 0.35);
+  color: #fff;
+  cursor: pointer;
+  font-family: 'Press Start 2P', monospace, sans-serif;
+  font-size: 10px;
+  letter-spacing: 2px;
+  padding: 10px 36px;
+  transition: transform 80ms, box-shadow 80ms;
+  width: 200px;
+
+  &:hover  { background: linear-gradient(180deg, #00d4a3 0%, #00a87c 100%); }
+  &:active { box-shadow: 0 2px 0 #006b51; transform: translateY(2px); }
+  &:disabled { cursor: not-allowed; filter: brightness(0.5); transform: none; }
+}
+
+.game-device__shutdown-btn {
+  background: linear-gradient(180deg, #636380 0%, #44445a 100%);
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 4px 0 #28283c, 0 6px 16px rgba(0, 0, 0, 0.4);
+  color: #aaaacc;
+  cursor: pointer;
+  font-family: 'Press Start 2P', monospace, sans-serif;
+  font-size: 8px;
+  letter-spacing: 1px;
+  padding: 9px 24px;
+  transition: transform 80ms, box-shadow 80ms, color 80ms, background 80ms;
+  width: 200px;
+
+  &:hover {
+    background: linear-gradient(180deg, #d63031 0%, #a82929 100%);
+    box-shadow: 0 4px 0 #7a1a1a, 0 6px 16px rgba(214, 48, 49, 0.4);
+    color: #fff;
+  }
+  &:active { box-shadow: 0 2px 0 #7a1a1a; transform: translateY(2px); }
+}
+
+
+
+/* ── Save status bar ─────────────────────────────────────────────── */
+.game-device__save-status {
+  color: #5a5a80;
+  font-size: 9px;
+  margin-top: 10px;
+  text-align: center;
+
+  &--saving { animation: blink 0.8s step-end infinite; color: #f6c90e; }
+  &--error  { color: #e84040; }
+}
+
+@keyframes blink { 50% { opacity: 0; } }
+
+/* ── Loading overlay ─────────────────────────────────────────────── */
+.game-device__loading {
+  align-items: center;
+  background: #050508;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  justify-content: center;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+
+  .game-device__loading-bar {
+    animation: load-bar 1.2s ease-in-out infinite alternate;
+    background: linear-gradient(90deg, #7c4dff, #00b894);
+    border-radius: 3px;
+    height: 4px;
+    width: 60px;
+  }
+
+  .game-device__loading-text {
+    color: #7c4dff;
+    font-family: 'Press Start 2P', monospace, sans-serif;
+    font-size: 7px;
+    letter-spacing: 2px;
+  }
+}
+
+@keyframes load-bar {
+  from { width: 20px; }
+  to   { width: 100px; }
+}

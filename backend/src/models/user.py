@@ -25,3 +25,4 @@ class User(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     trainer_pokemons = relationship("TrainerPokemon", back_populates="trainer")
+    game_save = relationship("GameSave", back_populates="trainer", uselist=False)
