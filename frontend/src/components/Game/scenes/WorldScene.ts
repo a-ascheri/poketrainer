@@ -11,6 +11,9 @@ interface DpadState {
   down: boolean;
   left: boolean;
   right: boolean;
+  interact: boolean;
+  /** Freeze player input when a React overlay (dialog / menu / party) is open. */
+  blocked: boolean;
 }
 
 interface InitData {
@@ -18,15 +21,18 @@ interface InitData {
   tileX?: number;
   tileY?: number;
   onSave?: (tileX: number, tileY: number, mapKey: string) => void;
+  onInteract?: (message: string) => void;
   dpad?: DpadState;
 }
 
 export class WorldScene extends Phaser.Scene {
   private player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
+  private interactKey!: Phaser.Input.Keyboard.Key;
   private posText!: Phaser.GameObjects.Text;
   private objectLayer!: Phaser.Tilemaps.TilemapLayer | Phaser.Tilemaps.TilemapGPULayer;
   private onSave?: (tileX: number, tileY: number, mapKey: string) => void;
+  private onInteract?: (message: string) => void;
   private lastDirection: 'down' | 'up' | 'left' | 'right' = 'down';
   private _initTileX = 5;
   private _initTileY = 7;
@@ -34,7 +40,8 @@ export class WorldScene extends Phaser.Scene {
   private currentMapDef!: MapDef;
   private mapWidthPx = 0;
   private mapHeightPx = 0;
-  private dpad: DpadState = { up: false, down: false, left: false, right: false };
+  private dpad: DpadState = { up: false, down: false, left: false, right: false, interact: false, blocked: false };
+  private _prevInteract = false;
 
   constructor() {
     super({ key: 'WorldScene' });
@@ -46,7 +53,9 @@ export class WorldScene extends Phaser.Scene {
     this._initTileX = data.tileX ?? 5;
     this._initTileY = data.tileY ?? 7;
     this.onSave = data.onSave;
+    this.onInteract = data.onInteract;
     this._transitioning = false;
+    this._prevInteract = false;
     if (data.dpad) this.dpad = data.dpad;
   }
 
@@ -95,6 +104,7 @@ export class WorldScene extends Phaser.Scene {
     this.cameras.main.fadeIn(300, 0, 0, 0);
 
     this.cursors = this.input.keyboard!.createCursorKeys();
+    this.interactKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
     this._createAnimations();
 
     this.posText = this.add
@@ -118,6 +128,25 @@ export class WorldScene extends Phaser.Scene {
 
   update(): void {
     if (!this.cursors || !this.player || this._transitioning) return;
+
+    // Track interact edge (just-pressed detection for the dpad A button)
+    const dpadInteractJust = this.dpad.interact && !this._prevInteract;
+    this._prevInteract = this.dpad.interact;
+
+    // Freeze player when a React overlay (dialog / menu / party) is visible
+    if (this.dpad.blocked) {
+      this.player.setVelocity(0, 0);
+      this.player.stop();
+      const idleFrame = { down: 0, up: 4, left: 8, right: 12 }[this.lastDirection];
+      this.player.setFrame(idleFrame);
+      return;
+    }
+
+    // Interact (A button or Space key)
+    const keyInteract = Phaser.Input.Keyboard.JustDown(this.interactKey);
+    if (keyInteract || dpadInteractJust) {
+      this._tryInteract();
+    }
 
     const { left, right, up, down } = this.cursors;
     this.player.setVelocity(0, 0);
@@ -201,6 +230,7 @@ export class WorldScene extends Phaser.Scene {
           tileX: spawnX,
           tileY: spawnY,
           onSave: this.onSave,
+          onInteract: this.onInteract,
           dpad: this.dpad,
         } satisfies InitData);
       },
@@ -230,5 +260,25 @@ export class WorldScene extends Phaser.Scene {
     const tileX = Math.floor(this.player.x / TILE_SIZE);
     const tileY = Math.floor(this.player.y / TILE_SIZE);
     this.onSave(tileX, tileY, this.currentMapDef.key);
+  }
+
+  /**
+   * Checks the tile immediately in front of the player and fires onInteract
+   * if it matches a registered sign in the current map's registry entry.
+   */
+  private _tryInteract(): void {
+    if (!this.player) return;
+    const tileX = Math.floor(this.player.x / TILE_SIZE);
+    const tileY = Math.floor(this.player.y / TILE_SIZE);
+    const offsets = { down: [0, 1], up: [0, -1], left: [-1, 0], right: [1, 0] } as const;
+    const [dx, dy] = offsets[this.lastDirection];
+    const facingX = tileX + dx;
+    const facingY = tileY + dy;
+    const sign = this.currentMapDef.signs?.find(
+      (s) => s.tileX === facingX && s.tileY === facingY,
+    );
+    if (sign) {
+      this.onInteract?.(sign.text);
+    }
   }
 }

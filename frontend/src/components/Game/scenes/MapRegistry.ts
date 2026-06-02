@@ -65,6 +65,12 @@ export interface MapDef {
     left?: MapConnection;
     right?: MapConnection;
   };
+  /**
+   * Interactive signs/noticeboards on this map.
+   * When the player faces a tile at (tileX, tileY) and presses the interact button,
+   * the `text` is displayed as a dialog.
+   */
+  signs?: Array<{ tileX: number; tileY: number; text: string }>;
 }
 
 export const MAP_REGISTRY: Record<string, MapDef> = {
@@ -83,6 +89,9 @@ export const MAP_REGISTRY: Record<string, MapDef> = {
       // Walk off the top edge → Route 1 (player X is preserved, spawns near bottom)
       top: { targetMap: 'route_1', spawnX: 0, spawnY: 57 },
     },
+    signs: [
+      { tileX: 25, tileY: 19, text: '¡Bienvenido a Pallet Town!' },
+    ],
   },
 
   route_1: {

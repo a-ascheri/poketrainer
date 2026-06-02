@@ -11,6 +11,7 @@ from src.services.pokemon_service import (acquire_pokemon, gain_experience,
                                           get_trainer_pokemon_moves,
                                           get_trainer_pokemon_stats,
                                           list_starters,
+                                          list_trainer_pokemon,
                                           select_starter_pokemon)
 
 router = APIRouter(prefix=GAME_TRAINER_PREFIX, tags=["Trainer"])
@@ -175,3 +176,16 @@ def get_pokemon_moves(
         current_level=owned.current_level,
         known_moves=owned.known_moves,
     )
+
+
+@router.get(
+    "/pokemon",
+    response_model=list[TrainerPokemonRead],
+    summary="Listar todos los pokémon del entrenador",
+)
+def list_my_pokemon(
+    db: Session = Depends(get_db),
+    trainer=Depends(require_trainer),
+):
+    """Devuelve todos los pokémon pertenecientes al entrenador autenticado."""
+    return list_trainer_pokemon(db, trainer)

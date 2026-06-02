@@ -290,3 +290,14 @@ def get_trainer_pokemon_moves(
     db: Session, trainer: User, trainer_pokemon_id: int
 ) -> TrainerPokemon:
     return _get_owned_pokemon_or_404(db, trainer.id, trainer_pokemon_id)
+
+
+def list_trainer_pokemon(db: Session, trainer: User) -> list[TrainerPokemon]:
+    return (
+        db.query(TrainerPokemon)
+        .filter(
+            TrainerPokemon.trainer_id == trainer.id,
+            TrainerPokemon.deleted_at.is_(None),
+        )
+        .all()
+    )

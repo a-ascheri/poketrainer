@@ -59,6 +59,11 @@ export const getStarterOptions = async (): Promise<StarterOption[]> => {
   return response.data;
 };
 
+export const listMyPokemon = async (): Promise<OwnedPokemon[]> => {
+  const response = await backendClient.get<OwnedPokemon[]>(API_ROUTES.trainer.pokemonList);
+  return response.data;
+};
+
 export const selectStarter = async (pokemonName: string): Promise<OwnedPokemon> => {
   const response = await backendClient.post<OwnedPokemon>(API_ROUTES.trainer.starterSelect, {
     pokemon_name: pokemonName,

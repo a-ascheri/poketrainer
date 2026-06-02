@@ -7,6 +7,8 @@ export interface DpadState {
   down: boolean;
   left: boolean;
   right: boolean;
+  interact: boolean;
+  blocked: boolean;
 }
 
 interface PhaserGameProps {
@@ -16,15 +18,17 @@ interface PhaserGameProps {
   initTileX?: number;
   initTileY?: number;
   onSave?: (tileX: number, tileY: number, mapKey: string) => void;
+  onInteract?: (message: string) => void;
   dpadState?: DpadState;
 }
 
-export default function PhaserGame({ width, height, initMapKey, initTileX, initTileY, onSave, dpadState }: PhaserGameProps) {
+export default function PhaserGame({ width, height, initMapKey, initTileX, initTileY, onSave, onInteract, dpadState }: PhaserGameProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const gameRef = useRef<Phaser.Game | null>(null);
-  // Keep onSave up-to-date without restarting Phaser on each render
   const onSaveRef = useRef(onSave);
   useEffect(() => { onSaveRef.current = onSave; }, [onSave]);
+  const onInteractRef = useRef(onInteract);
+  useEffect(() => { onInteractRef.current = onInteract; }, [onInteract]);
 
   useEffect(() => {
     if (!containerRef.current || gameRef.current) return;
@@ -35,7 +39,6 @@ export default function PhaserGame({ width, height, initMapKey, initTileX, initT
       height,
       backgroundColor: '#1a1a2e',
       parent: containerRef.current,
-      // No scenes in array — we start manually via postBoot to pass init data
       scene: [],
       physics: {
         default: 'arcade',
@@ -49,6 +52,7 @@ export default function PhaserGame({ width, height, initMapKey, initTileX, initT
             tileX: initTileX ?? 5,
             tileY: initTileY ?? 7,
             onSave: (x: number, y: number, mk: string) => onSaveRef.current?.(x, y, mk),
+            onInteract: (msg: string) => onInteractRef.current?.(msg),
             dpad: dpadState,
           });
         },

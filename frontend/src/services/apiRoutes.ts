@@ -19,6 +19,7 @@ export const API_ROUTES = {
       `${TRAINER}/pokemon/${trainerPokemonId}/gain-exp`,
     pokemonStats: (trainerPokemonId: number) => `${TRAINER}/pokemon/${trainerPokemonId}/stats`,
     pokemonMoves: (trainerPokemonId: number) => `${TRAINER}/pokemon/${trainerPokemonId}/moves`,
+    pokemonList: `${TRAINER}/pokemon`,
   },
   user: {
     authorize: `${USER}/authorize`,
