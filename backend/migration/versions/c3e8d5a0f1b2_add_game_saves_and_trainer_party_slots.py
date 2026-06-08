@@ -22,13 +22,29 @@ def upgrade() -> None:
     op.create_table(
         "game_saves",
         sa.Column("id", sa.Integer(), primary_key=True, index=True),
-        sa.Column("trainer_id", sa.Integer(), sa.ForeignKey("users.id"), nullable=False, unique=True, index=True),
-        sa.Column("map_id", sa.String(length=100), nullable=False, server_default="pallet_town"),
+        sa.Column(
+            "trainer_id",
+            sa.Integer(),
+            sa.ForeignKey("users.id"),
+            nullable=False,
+            unique=True,
+            index=True,
+        ),
+        sa.Column(
+            "map_id",
+            sa.String(length=100),
+            nullable=False,
+            server_default="pallet_town",
+        ),
         sa.Column("tile_x", sa.Integer(), nullable=False, server_default="5"),
         sa.Column("tile_y", sa.Integer(), nullable=False, server_default="7"),
-        sa.Column("direction", sa.String(length=10), nullable=False, server_default="down"),
+        sa.Column(
+            "direction", sa.String(length=10), nullable=False, server_default="down"
+        ),
         sa.Column("money", sa.Integer(), nullable=False, server_default="3000"),
-        sa.Column("play_time_seconds", sa.Integer(), nullable=False, server_default="0"),
+        sa.Column(
+            "play_time_seconds", sa.Integer(), nullable=False, server_default="0"
+        ),
         sa.Column("badges", sa.JSON(), nullable=False, server_default="[]"),
         sa.Column("inventory", sa.JSON(), nullable=False, server_default="{}"),
         sa.Column("game_flags", sa.JSON(), nullable=False, server_default="{}"),
@@ -41,7 +57,13 @@ def upgrade() -> None:
     op.create_table(
         "trainer_party_slots",
         sa.Column("id", sa.Integer(), primary_key=True, index=True),
-        sa.Column("game_save_id", sa.Integer(), sa.ForeignKey("game_saves.id"), nullable=False, index=True),
+        sa.Column(
+            "game_save_id",
+            sa.Integer(),
+            sa.ForeignKey("game_saves.id"),
+            nullable=False,
+            index=True,
+        ),
         sa.Column(
             "trainer_pokemon_id",
             sa.Integer(),

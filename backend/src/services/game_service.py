@@ -13,14 +13,18 @@ def get_game_save(trainer_id: int, db: Session) -> GameSave | None:
 def get_game_save_or_404(trainer_id: int, db: Session) -> GameSave:
     save = get_game_save(trainer_id, db)
     if not save:
-        raise HTTPException(status_code=404, detail="No existe partida guardada para este entrenador")
+        raise HTTPException(
+            status_code=404, detail="No existe partida guardada para este entrenador"
+        )
     return save
 
 
 def create_game_save(trainer_id: int, db: Session) -> GameSave:
     existing = get_game_save(trainer_id, db)
     if existing:
-        raise HTTPException(status_code=409, detail="Ya existe una partida para este entrenador")
+        raise HTTPException(
+            status_code=409, detail="Ya existe una partida para este entrenador"
+        )
 
     # Verificar que el entrenador tiene starter seleccionado
     starter = (
@@ -34,7 +38,8 @@ def create_game_save(trainer_id: int, db: Session) -> GameSave:
     )
     if not starter:
         raise HTTPException(
-            status_code=400, detail="El entrenador debe seleccionar su starter antes de comenzar"
+            status_code=400,
+            detail="El entrenador debe seleccionar su starter antes de comenzar",
         )
 
     save = GameSave(trainer_id=trainer_id)
@@ -69,7 +74,9 @@ def set_party_slot(
     trainer_id: int, trainer_pokemon_id: int, slot_position: int, db: Session
 ) -> TrainerPartySlot:
     if not (0 <= slot_position <= 5):
-        raise HTTPException(status_code=400, detail="slot_position debe estar entre 0 y 5")
+        raise HTTPException(
+            status_code=400, detail="slot_position debe estar entre 0 y 5"
+        )
 
     save = get_game_save_or_404(trainer_id, db)
 
@@ -84,7 +91,10 @@ def set_party_slot(
         .first()
     )
     if not tp:
-        raise HTTPException(status_code=404, detail="Pokémon no encontrado en la colección del entrenador")
+        raise HTTPException(
+            status_code=404,
+            detail="Pokémon no encontrado en la colección del entrenador",
+        )
 
     # Liberar el slot si ya estaba ocupado
     existing_slot = (
@@ -131,7 +141,10 @@ def remove_party_slot(trainer_id: int, slot_position: int, db: Session) -> None:
         .count()
     )
     if total_slots <= 1:
-        raise HTTPException(status_code=400, detail="El entrenador debe tener al menos 1 pokémon en la party")
+        raise HTTPException(
+            status_code=400,
+            detail="El entrenador debe tener al menos 1 pokémon en la party",
+        )
 
     db.delete(slot)
     db.commit()

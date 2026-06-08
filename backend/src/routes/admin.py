@@ -5,9 +5,13 @@ from src.database.database import get_db
 from src.routes.auth_dependencies import require_admin
 from src.routes.prefixes import ADMIN_PREFIX
 from src.schemas.user import AdminCreate, UserRead, UserUpdate
-from src.services.user_service import (create_admin_user, get_user_by_id,
-                                       list_users, soft_delete_user,
-                                       update_user)
+from src.services.user_service import (
+    create_admin_user,
+    get_user_by_id,
+    list_users,
+    soft_delete_user,
+    update_user,
+)
 
 router = APIRouter(prefix=ADMIN_PREFIX, tags=["Admin"])
 
@@ -83,7 +87,9 @@ def admin_update_user(
     return update_user(user_id, payload, db)
 
 
-@router.delete("/users/{user_id}",)
+@router.delete(
+    "/users/{user_id}",
+)
 def admin_delete_user(
     user_id: int,
     db: Session = Depends(get_db),

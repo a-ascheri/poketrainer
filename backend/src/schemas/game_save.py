@@ -14,12 +14,14 @@ class PartySlotRead(BaseModel):
 
 class GameSaveCreate(BaseModel):
     """Payload para crear una nueva partida desde cero."""
+
     # El starter ya fue seleccionado anteriormente; se agrega a la party desde el backend.
     pass
 
 
 class GameSaveUpdate(BaseModel):
     """Payload para actualizar la posición/estado de la partida (autosave / manual save)."""
+
     map_id: str | None = None
     tile_x: int | None = None
     tile_y: int | None = None

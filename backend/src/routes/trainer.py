@@ -4,10 +4,10 @@ from sqlalchemy.orm import Session
 from src.routes.auth_dependencies import require_admin
 from src.routes.prefixes import ADMIN_TRAINER_PREFIX
 from src.schemas.trainer import TrainerCreate, TrainerRead, TrainerUpdate
-from src.services.trainer_service import (create_trainer as create_trainer_service,
-                                          delete_trainer as delete_trainer_service,
-                                          list_trainers as list_trainers_service,
-                                          update_trainer as update_trainer_service)
+from src.services.trainer_service import create_trainer as create_trainer_service
+from src.services.trainer_service import delete_trainer as delete_trainer_service
+from src.services.trainer_service import list_trainers as list_trainers_service
+from src.services.trainer_service import update_trainer as update_trainer_service
 
 from ..database.database import get_db
 

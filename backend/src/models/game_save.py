@@ -16,7 +16,9 @@ class GameSave(Base):
     __tablename__ = "game_saves"
 
     id = Column(Integer, primary_key=True, index=True)
-    trainer_id = Column(Integer, ForeignKey("users.id"), nullable=False, unique=True, index=True)
+    trainer_id = Column(
+        Integer, ForeignKey("users.id"), nullable=False, unique=True, index=True
+    )
 
     # Posición en el mundo
     map_id = Column(String(100), nullable=False, default=DEFAULT_STARTING_MAP)
@@ -29,9 +31,11 @@ class GameSave(Base):
     play_time_seconds = Column(Integer, nullable=False, default=0)
 
     # Progreso (JSON flexible para agregar flags sin migrar)
-    badges = Column(JSON, nullable=False, default=list)       # ["boulder_badge", ...]
-    inventory = Column(JSON, nullable=False, default=dict)    # {"poke_ball": 5, ...}
-    game_flags = Column(JSON, nullable=False, default=dict)   # {"rival_first_battle": True, ...}
+    badges = Column(JSON, nullable=False, default=list)  # ["boulder_badge", ...]
+    inventory = Column(JSON, nullable=False, default=dict)  # {"poke_ball": 5, ...}
+    game_flags = Column(
+        JSON, nullable=False, default=dict
+    )  # {"rival_first_battle": True, ...}
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
@@ -48,7 +52,9 @@ class TrainerPartySlot(Base):
     __tablename__ = "trainer_party_slots"
 
     id = Column(Integer, primary_key=True, index=True)
-    game_save_id = Column(Integer, ForeignKey("game_saves.id"), nullable=False, index=True)
+    game_save_id = Column(
+        Integer, ForeignKey("game_saves.id"), nullable=False, index=True
+    )
     trainer_pokemon_id = Column(
         Integer, ForeignKey("trainer_pokemon.id"), nullable=False, index=True
     )

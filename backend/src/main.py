@@ -70,7 +70,9 @@ app = FastAPI(
     openapi_tags=openapi_tags,
 )
 
-cors_origins = [origin.strip() for origin in settings.CORS_ORIGINS.split(",") if origin.strip()]
+cors_origins = [
+    origin.strip() for origin in settings.CORS_ORIGINS.split(",") if origin.strip()
+]
 
 # Habilitar CORS para el frontend en desarrollo
 app.add_middleware(

@@ -19,7 +19,12 @@ def load_save(
     return game_service.get_game_save_or_404(current_user.id, db)
 
 
-@router.post("/save", response_model=GameSaveRead, status_code=status.HTTP_201_CREATED, summary="Crear nueva partida")
+@router.post(
+    "/save",
+    response_model=GameSaveRead,
+    status_code=status.HTTP_201_CREATED,
+    summary="Crear nueva partida",
+)
 def new_game(
     current_user=Depends(require_trainer),
     db: Session = Depends(get_db),
@@ -28,7 +33,9 @@ def new_game(
     return game_service.create_game_save(current_user.id, db)
 
 
-@router.put("/save", response_model=GameSaveRead, summary="Guardar partida (autosave / manual)")
+@router.put(
+    "/save", response_model=GameSaveRead, summary="Guardar partida (autosave / manual)"
+)
 def save_game(
     payload: GameSaveUpdate,
     current_user=Depends(require_trainer),

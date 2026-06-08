@@ -12,8 +12,7 @@ from src.services.user_service import authenticate_user, change_password
 from src.services.user_service import create_user as create_user_service
 
 from ..database.database import get_db
-from ..schemas.user import (ChangePasswordInput, LoginResponse, UserCreate,
-                            UserRead)
+from ..schemas.user import ChangePasswordInput, LoginResponse, UserCreate, UserRead
 
 # Almacenamiento temporal de códigos de autorización (en memoria, solo para demo)
 # en desarrollo usar una base de datos o caché como Redis
@@ -196,5 +195,4 @@ def get_profile(current_user=Depends(get_current_user_entity)):
         UserRead: Perfil del usuario autenticado.
     """
     return current_user
-
 

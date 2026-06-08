@@ -4,15 +4,22 @@ from sqlalchemy.orm import Session
 from src.database.database import get_db
 from src.routes.auth_dependencies import require_trainer
 from src.routes.prefixes import GAME_TRAINER_PREFIX
-from src.schemas.pokemon import (GainExperienceInput, PokemonMovesRead,
-                                 PokemonStatsRead, StarterSelectionInput,
-                                 TrainerPokemonRead)
-from src.services.pokemon_service import (acquire_pokemon, gain_experience,
-                                          get_trainer_pokemon_moves,
-                                          get_trainer_pokemon_stats,
-                                          list_starters,
-                                          list_trainer_pokemon,
-                                          select_starter_pokemon)
+from src.schemas.pokemon import (
+    GainExperienceInput,
+    PokemonMovesRead,
+    PokemonStatsRead,
+    StarterSelectionInput,
+    TrainerPokemonRead,
+)
+from src.services.pokemon_service import (
+    acquire_pokemon,
+    gain_experience,
+    get_trainer_pokemon_moves,
+    get_trainer_pokemon_stats,
+    list_starters,
+    list_trainer_pokemon,
+    select_starter_pokemon,
+)
 
 router = APIRouter(prefix=GAME_TRAINER_PREFIX, tags=["Trainer"])
 
