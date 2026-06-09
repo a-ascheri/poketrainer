@@ -195,4 +195,3 @@ def get_profile(current_user=Depends(get_current_user_entity)):
         UserRead: Perfil del usuario autenticado.
     """
     return current_user
-
