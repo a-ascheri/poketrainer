@@ -12,6 +12,7 @@ from src.routes.system import router as system_router
 
 from src.routes.trainer_pokemon import router as trainer_pokemon_router
 from src.routes.user import router as user_router
+from src.routes.pokemon import router as pokemon_router # <--- AÑADIR ESTA LÍNEA CON ALIAS
 from src.services.user_service import ensure_initial_admin
 
 
@@ -34,6 +35,12 @@ openapi_tags = [
             "Endpoints de estado de juego: partida guardada, posición en el mundo,"
             " party activa e inventario del entrenador."
         ),
+    },
+    {
+        "name": "Pokemon", # <--- OPCIONAL: AÑADIR ESTE TAG PARA DOCUMENTACIÓN EN /docs
+        "description": (
+            "Endpoints para consultar información de Pokémon (Pokedex)."
+            ),
     },
     {
         "name": "Admin",
@@ -89,3 +96,4 @@ app.include_router(admin_router)
 app.include_router(trainer_pokemon_router)
 app.include_router(game_router)
 app.include_router(system_router)
+app.include_router(pokemon_router) # <--- AÑADIR ESTA LÍNEA

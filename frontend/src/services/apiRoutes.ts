@@ -5,6 +5,7 @@ export const TRAINER = `${API_V1}/game/trainer`;
 export const GAME = `${API_V1}/game`;
 export const USER = `${API_V1}/user`;
 export const SYSTEM = `${API_V1}/system`;
+export const POKEMON = `${API_V1}/pokemon`;
 
 export const API_ROUTES = {
   admin: {
@@ -36,5 +37,8 @@ export const API_ROUTES = {
   game: {
     save: `${GAME}/save`,
     partySlot: (slotPosition: number) => `${GAME}/save/party/${slotPosition}`,
+  },
+  pokemon: {
+    search: (query: string) => `${API_V1}/pokemon/${encodeURIComponent(query)}`,
   },
 } as const;
