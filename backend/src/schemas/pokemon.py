@@ -1,3 +1,5 @@
+import re
+
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
@@ -120,20 +122,39 @@ class PokemonDataResponseSchema(BaseModel):
 class PokemonSearchInput(BaseModel):
     """
     Schema para validar el parámetro de búsqueda de Pokémon.
+    Añade validaciones para números negativos y formato de texto.
     """
-
     query: str = Field(
         ...,
         min_length=1,
         max_length=100,
         description="Nombre o ID del Pokémon a buscar",
+        example="pikachu"
     )
 
-    @validator("query")
-    def query_must_not_be_empty(cls, v):
+    @validator('query')
+    def validate_query_content(cls, v):
         stripped_query = v.strip()
         if not stripped_query:
+            raise ValueError("La consulta de búsqueda no puede estar vacía o consistir solo en espacios.")
+
+        # --- Validación para números negativos ---
+        # Si la consulta parece un número, validamos que sea positivo.
+        # Esto es útil si los usuarios buscan por ID numérico.
+        if stripped_query.isdigit():
+            pokemon_id = int(stripped_query)
+            if pokemon_id <= 0:
+                raise ValueError("El ID del Pokémon no puede ser cero o negativo.")
+        
+        # --- Validación con Expresiones Regulares (ej. para nombres) ---
+        # Permite letras, números, guiones, espacios (comunes en nombres de Pokémon)
+        # Puedes ajustar esta regex según los caracteres permitidos en los nombres de Pokémon
+        # Ej: "Nidoran-m", "Porygon2"
+        # La regex actual permite letras (unicode), números, espacios, guiones y apóstrofes.
+        if not re.fullmatch(r"[\w\s\-\']+", stripped_query, re.UNICODE):
             raise ValueError(
-                "La consulta de búsqueda no puede estar vacía o consistir solo en espacios."
+                "La consulta contiene caracteres no permitidos. "
+                "Usa solo letras, números, espacios, guiones y apóstrofes."
             )
+
         return stripped_query

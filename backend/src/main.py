@@ -8,9 +8,7 @@ from src.config import settings
 from src.database.database import SessionLocal, setup_engine
 from src.routes.admin import router as admin_router
 from src.routes.game import router as game_router
-from src.routes.pokemon import (
-    router as pokemon_router,
-)
+from src.routes.pokemon import router as pokemon_router
 from src.routes.system import router as system_router
 from src.routes.trainer_pokemon import router as trainer_pokemon_router
 from src.routes.user import router as user_router

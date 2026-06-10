@@ -20,6 +20,7 @@ pokeapi_client = httpx.AsyncClient(base_url=POKEAPI_BASE_URL)
 pokeapi_cache: Dict[str, PokemonDataResponseSchema] = {}
 CACHE_TTL_SECONDS = 3600  # 1 hora
 
+
 # Funciones de Transformación (Adaptadas del Frontend)
 def _extract_evolution_names(chain: Dict[str, Any]) -> List[str]:
     """Extrae los nombres de la cadena de evolución de la respuesta de PokeAPI."""
