@@ -14,8 +14,7 @@ from src.services.user_service import create_user as create_user_service
 from ..database.database import get_db
 from ..schemas.user import ChangePasswordInput, LoginResponse, UserCreate, UserRead
 
-# Almacenamiento temporal de códigos de autorización (en memoria, solo para demo)
-# en desarrollo usar una base de datos o caché como Redis
+# Almacenamiento temporal de códigos de autorización (en memoria, solo para demo, redis para prouccion)
 authorization_codes = {}
 router = APIRouter(prefix=USER_PREFIX, tags=["User"])
 

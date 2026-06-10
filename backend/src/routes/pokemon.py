@@ -1,7 +1,8 @@
 from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, Query, status, Path
-from sqlalchemy.orm import Session
+
+from fastapi import APIRouter, Depends, HTTPException, Path, Query, status
 from pydantic import ValidationError
+from sqlalchemy.orm import Session
 
 from src.database.database import get_db
 from src.routes.prefixes import POKEMON_PREFIX
@@ -19,7 +20,9 @@ router = APIRouter(prefix=POKEMON_PREFIX, tags=["Pokemon"])
 )
 # Aunque no interactúa con DB local directamente, se mantiene para consistencia
 async def search_pokemon(
-    query_param: str = Path(..., description="Nombre o ID del Pokémon a buscar", example="pikachu"), # <-- Usar Path
+    query_param: str = Path(
+        ..., description="Nombre o ID del Pokémon a buscar", example="pikachu"
+    ),  # <-- Usar Path
     db: Session = Depends(get_db),
 ) -> PokemonDataResponseSchema:
     """
@@ -27,7 +30,7 @@ async def search_pokemon(
     Los datos se obtienen de PokeAPI y se gestionan a través del servicio con cacheo.
     """
     try:
-        # 1. Validar la query usando nuestro schema Pydantic
+        # 1. Validar la query usando schema Pydantic
         # Si la validación falla, Pydantic/FastAPI automáticamente generará un 422
         search_input = PokemonSearchInput(query=query_param)
         validated_query = search_input.query
@@ -38,31 +41,30 @@ async def search_pokemon(
         if not pokemon_data:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Pokémon '{validated_query}' no encontrado."
+                detail=f"Pokémon '{validated_query}' no encontrado.",
             )
 
         return pokemon_data
 
     except ValidationError as e:
-    # Convertir los errores de Pydantic a un formato JSON serializable
+        # Convertir los errores de Pydantic a un formato JSON serializable
         errors = []
         for error in e.errors():
-            errors.append({
-                "field": ".".join(str(loc) for loc in error["loc"]),
-                "message": error["msg"],
-                "input": error.get("input")
-            })
-        
+            errors.append(
+                {
+                    "field": ".".join(str(loc) for loc in error["loc"]),
+                    "message": error["msg"],
+                    "input": error.get("input"),
+                }
+            )
+
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail={
-                "message": "Error de validación en la búsqueda",
-                "errors": errors
-            }
+            detail={"message": "Error de validación en la búsqueda", "errors": errors},
         )
     except Exception as e:
         # Captura cualquier otra excepción inesperada
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Ocurrió un error inesperado en el servidor: {e}"
+            detail=f"Ocurrió un error inesperado en el servidor: {e}",
         )

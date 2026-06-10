@@ -12,13 +12,6 @@ class PartySlotRead(BaseModel):
         from_attributes = True
 
 
-class GameSaveCreate(BaseModel):
-    """Payload para crear una nueva partida desde cero."""
-
-    # El starter ya fue seleccionado anteriormente; se agrega a la party desde el backend.
-    pass
-
-
 class GameSaveUpdate(BaseModel):
     """Payload para actualizar la posición/estado de la partida (autosave / manual save)."""
 

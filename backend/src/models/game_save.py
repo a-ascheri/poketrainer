@@ -31,8 +31,8 @@ class GameSave(Base):
     play_time_seconds = Column(Integer, nullable=False, default=0)
 
     # Progreso (JSON flexible para agregar flags sin migrar)
-    badges = Column(JSON, nullable=False, default=list)  # ["boulder_badge", ...]
-    inventory = Column(JSON, nullable=False, default=dict)  # {"poke_ball": 5, ...}
+    badges = Column(JSON, nullable=False, default=list)  # Badges
+    inventory = Column(JSON, nullable=False, default=dict)  # Pokeballs: 5
     game_flags = Column(
         JSON, nullable=False, default=dict
     )  # {"rival_first_battle": True, ...}
