@@ -15,6 +15,7 @@ export default function PokemonSearchModal({ isOpen, onClose }: PokemonSearchMod
   const [pokemonData, setPokemonData] = useState<PokemonData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isClosing, setIsClosing] = useState(false);
 
   // Cerrar con ESC
   useEffect(() => {
@@ -32,10 +33,14 @@ export default function PokemonSearchModal({ isOpen, onClose }: PokemonSearchMod
   }, [isOpen]);
 
   const handleClose = () => {
-    setSearchTerm('');
-    setPokemonData(null);
-    setError(null);
-    onClose();
+    setIsClosing(true); 
+    setTimeout(() => {
+      setIsClosing(false);
+      setSearchTerm('');
+      setPokemonData(null);
+      setError(null);
+      onClose();
+    }, 250);
   };
 
   const handleSearch = async (e: React.FormEvent) => {
@@ -68,12 +73,17 @@ export default function PokemonSearchModal({ isOpen, onClose }: PokemonSearchMod
     }
   };
 
-  if (!isOpen) return null;
+  if (!isOpen && !isClosing) return null;
+
+  if (!isOpen && !isClosing) return null;
 
   return (
     <>
-      <div className="modal-overlay" onClick={handleClose} />
-      <div className="pokemon-search-modal">
+      <div 
+        className={`modal-overlay ${isClosing ? 'modal-overlay--closing' : ''}`} 
+        onClick={handleClose} 
+      />
+      <div className={`pokemon-search-modal ${isClosing ? 'pokemon-search-modal--closing' : ''}`}>
         <button className="pokemon-search-modal__close" onClick={handleClose}>
           ✕
         </button>
@@ -88,6 +98,7 @@ export default function PokemonSearchModal({ isOpen, onClose }: PokemonSearchMod
             placeholder="Ej: Pikachu, 25, Charizard..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
+            onKeyDown={(e) => e.stopPropagation()}
             autoFocus
           />
           <button type="submit" disabled={loading}>
