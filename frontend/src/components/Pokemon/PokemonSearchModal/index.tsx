@@ -77,10 +77,9 @@ export default function PokemonSearchModal({ isOpen, onClose }: PokemonSearchMod
         <button className="pokemon-search-modal__close" onClick={handleClose}>
           ✕
         </button>
-
         <div className="pokemon-search-modal__header">
-          <h2 className="pokemon-search-modal__title">🔍 Pokédex</h2>
-          <p className="pokemon-search-modal__subtitle">Buscá por nombre o ID</p>
+          <h2 className="pokemon-search-modal__title">Pokédex</h2>
+          <p className="pokemon-search-modal__subtitle">Ingresa nombre o ID</p>
         </div>
 
         <form onSubmit={handleSearch} className="pokemon-search-modal__form">

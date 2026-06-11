@@ -16,28 +16,30 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: #121212;
-  border: 1px solid #343434;
+  background: linear-gradient(135deg, #0a2a3a 0%, #0a1a2a 100%);  // Degradado celeste oscuro
+  border: 2px solid #00b4d8;  // Borde celeste
   border-radius: 18px;
   width: 90%;
   max-width: 700px;
   max-height: 85vh;
   overflow-y: auto;
   z-index: 1001;
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 25px 50px rgba(0, 180, 216, 0.2);  // Sombra celeste
   animation: slideUp 0.3s ease-out;
+  padding: 10px 0;
 
   &::-webkit-scrollbar {
-    width: 8px;
+    width: 4px;
   }
 
   &::-webkit-scrollbar-track {
-    background: #0d0d0d;
+    background: #0a2a3a;
     border-radius: 10px;
+    margin: 10px 0;
   }
 
   &::-webkit-scrollbar-thumb {
-    background: #5a5a80;
+    background: #00b4d8;
     border-radius: 10px;
   }
 
@@ -45,12 +47,12 @@
     position: absolute;
     top: 1rem;
     right: 1rem;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid #343434;
+    background: rgba(0, 180, 216, 0.1);
+    border: 1px solid #00b4d8;
     border-radius: 50%;
     width: 32px;
     height: 32px;
-    color: #fff;
+    color: #00b4d8;
     font-size: 1.2rem;
     cursor: pointer;
     transition: all 0.2s;
@@ -59,8 +61,8 @@
     justify-content: center;
 
     &:hover {
-      background: rgba(255, 215, 0, 0.2);
-      border-color: #ffd700;
+      background: rgba(0, 180, 216, 0.3);
+      border-color: #48cae4;
       transform: scale(1.05);
     }
   }
@@ -71,16 +73,17 @@
   }
 
   &__title {
-    color: #ffd700;
+    color: #48cae4;  // Celeste más claro
     font-family: 'Press Start 2P', monospace, sans-serif;
-    font-size: 1.2rem;
+    font-size: 1.8rem;
     letter-spacing: 2px;
     margin: 0 0 0.5rem;
     text-transform: uppercase;
+    text-shadow: 0 0 10px rgba(0, 180, 216, 0.5);
   }
 
   &__subtitle {
-    color: #a0a0a0;
+    color: #90e0ef;  // Celeste muy claro
     font-size: 0.85rem;
     margin: 0;
   }
@@ -90,13 +93,13 @@
     gap: 0.6rem;
     grid-template-columns: 1fr 120px;
     padding: 1rem 1.5rem;
-    border-top: 1px solid #2a2a3e;
-    border-bottom: 1px solid #2a2a3e;
+    border-top: 1px solid #00b4d8;
+    border-bottom: 1px solid #00b4d8;
     margin: 1rem 0;
 
     input {
-      background: #0d0d0d;
-      border: 1px solid #525252;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid #00b4d8;
       border-radius: 10px;
       color: #fff;
       padding: 0.72rem 0.8rem;
@@ -104,22 +107,23 @@
 
       &:focus {
         outline: none;
-        border-color: #ffd700;
+        border-color: #48cae4;
+        box-shadow: 0 0 5px rgba(0, 180, 216, 0.5);
       }
     }
 
     button {
-      background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+      background: linear-gradient(135deg, #00b4d8 0%, #0096c7 100%);
       border: none;
       border-radius: 10px;
-      color: #101010;
+      color: white;
       cursor: pointer;
       font-weight: 800;
       transition: all 0.2s;
 
       &:hover:not(:disabled) {
         transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+        box-shadow: 0 5px 15px rgba(0, 180, 216, 0.4);
       }
 
       &:disabled {
@@ -130,7 +134,7 @@
   }
 
   &__error {
-    background: #8d10102e;
+    background: rgba(255, 0, 0, 0.1);
     border: 1px solid #ff7b7b52;
     border-radius: 10px;
     color: #ffadad;
@@ -141,8 +145,6 @@
   &__result {
     padding: 0 1.5rem 1.5rem;
     
-    // Los estilos de PokemonCard y PokemonDetails se mantienen intactos
-    // Solo agregamos un poco de separación entre ellos
     > :first-child {
       margin-bottom: 1.5rem;
     }

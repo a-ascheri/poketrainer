@@ -1,7 +1,6 @@
 import { useState } from 'react'; 
 import GameShell from '../../components/Game/GameShell';
 import PokemonSearchModal from '../../components/Pokemon/PokemonSearchModal';
-//import PokemonSearch from '../../components/Pokemon/PokemonSearch';
 import './trainer-home.scss';
 
 /**
@@ -17,13 +16,13 @@ export default function TrainerHome() {
   return (
     <div className="trainer-home">
       <GameShell />
+      
       <div className="trainer-home__pokedex-header">
-        <h2 className="trainer-home__title">Pokédex</h2>
         <button 
-          className="trainer-home__search-trigger"
+          className="trainer-home__title"
           onClick={openModal}
         >
-          Buscar Pokémon
+          Pokédex
         </button>
       </div>
 
@@ -31,7 +30,6 @@ export default function TrainerHome() {
         isOpen={isModalOpen} 
         onClose={closeModal} 
       />
-      {/* FIN del bloque agregado */}
     </div>
   );
 }
