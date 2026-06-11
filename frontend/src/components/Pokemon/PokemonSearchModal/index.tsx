@@ -15,7 +15,6 @@ export default function PokemonSearchModal({ isOpen, onClose }: PokemonSearchMod
   const [pokemonData, setPokemonData] = useState<PokemonData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showDetails, setShowDetails] = useState(false);
 
   // Cerrar con ESC
   useEffect(() => {
@@ -36,7 +35,6 @@ export default function PokemonSearchModal({ isOpen, onClose }: PokemonSearchMod
     setSearchTerm('');
     setPokemonData(null);
     setError(null);
-    setShowDetails(false);
     onClose();
   };
 
@@ -47,7 +45,6 @@ export default function PokemonSearchModal({ isOpen, onClose }: PokemonSearchMod
     setLoading(true);
     setError(null);
     setPokemonData(null);
-    setShowDetails(false);
 
     try {
       const response = await fetch(`/api/v1/pokemon/${searchTerm.toLowerCase()}`);
@@ -105,27 +102,9 @@ export default function PokemonSearchModal({ isOpen, onClose }: PokemonSearchMod
           </div>
         )}
 
-        {pokemonData && !showDetails && (
-          <div 
-            className="pokemon-search-modal__card"
-            onClick={() => setShowDetails(true)}
-            style={{ cursor: 'pointer' }}
-          >
+        {pokemonData && (
+          <div className="pokemon-search-modal__result">
             <PokemonCard pokemon={pokemonData} />
-            <div className="pokemon-search-modal__expand-hint">
-              Clickeá para ver más detalles
-            </div>
-          </div>
-        )}
-
-        {pokemonData && showDetails && (
-          <div className="pokemon-search-modal__details">
-            <button 
-              className="pokemon-search-modal__back"
-              onClick={() => setShowDetails(false)}
-            >
-              ← Volver a la tarjeta
-            </button>
             <PokemonDetails pokemon={pokemonData} />
           </div>
         )}

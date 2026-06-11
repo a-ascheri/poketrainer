@@ -138,43 +138,13 @@
     margin: 0 1.5rem 1rem;
   }
 
-  &__card {
+  &__result {
     padding: 0 1.5rem 1.5rem;
-    cursor: pointer;
-    transition: transform 0.2s;
-
-    &:hover {
-      transform: scale(1.02);
-    }
-  }
-
-  &__expand-hint {
-    text-align: center;
-    font-size: 0.75rem;
-    color: #ffd700;
-    margin-top: 0.5rem;
-    opacity: 0.7;
-  }
-
-  &__details {
-    padding: 0 1.5rem 1.5rem;
-  }
-
-  &__back {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid #343434;
-    border-radius: 20px;
-    padding: 0.5rem 1rem;
-    color: #ffd700;
-    cursor: pointer;
-    margin-bottom: 1rem;
-    transition: all 0.2s;
-    font-size: 0.85rem;
-
-    &:hover {
-      background: rgba(255, 215, 0, 0.15);
-      border-color: #ffd700;
-      transform: translateX(-5px);
+    
+    // Los estilos de PokemonCard y PokemonDetails se mantienen intactos
+    // Solo agregamos un poco de separación entre ellos
+    > :first-child {
+      margin-bottom: 1.5rem;
     }
   }
 }

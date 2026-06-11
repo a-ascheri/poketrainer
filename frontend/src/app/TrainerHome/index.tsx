@@ -11,8 +11,8 @@ import './trainer-home.scss';
 export default function TrainerHome() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const openModal = () => setIsModalOpen(true); 
-  const closeModal = () => setIsModalOpen(false); 
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
 
   return (
     <div className="trainer-home">
