@@ -5,7 +5,8 @@ from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 
 from src.models.user import User
-from src.schemas.user import AdminCreate, ChangePasswordInput, UserCreate, UserUpdate
+from src.schemas.user import (AdminCreate, ChangePasswordInput, UserCreate,
+                              UserUpdate)
 
 ADMIN_ROLE = "admin"
 TRAINER_ROLE = "trainer"

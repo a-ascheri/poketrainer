@@ -17,7 +17,7 @@ if str(BACKEND_ROOT) not in sys.path:
 
 import src.database.database as database
 from src.main import app
-from src.models import pokemon, trainer, trainer_pokemon, user  # noqa: F401
+from src.models import pokemon, trainer_pokemon, user  # noqa: F401
 
 
 @pytest.fixture(scope="session", autouse=True)

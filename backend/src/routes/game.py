@@ -10,45 +10,70 @@ from src.services import game_service
 router = APIRouter(prefix=GAME_PREFIX, tags=["Game"])
 
 
-@router.get("/save", response_model=GameSaveRead, summary="Cargar partida guardada")
+@router.get("/save", response_model=GameSaveRead)
 def load_save(
     current_user=Depends(require_trainer),
     db: Session = Depends(get_db),
 ):
-    """Devuelve la partida guardada del entrenador autenticado."""
+    """
+    Obtiene el estado actual de la partida del entrenador. Si no existe una partida, devuelve 404.
+    
+    Args:
+        current_user (_type_, optional): _description_. Defaults to Depends(require_trainer).
+        db (Session, optional): _description_. Defaults to Depends(get_db).
+
+    Returns:
+        _type_: _description_
+    """
     return game_service.get_game_save_or_404(current_user.id, db)
 
 
 @router.post(
     "/save",
     response_model=GameSaveRead,
-    status_code=status.HTTP_201_CREATED,
-    summary="Crear nueva partida",
+    status_code=status.HTTP_201_CREATED
 )
 def new_game(
     current_user=Depends(require_trainer),
     db: Session = Depends(get_db),
 ):
-    """Crea una nueva partida para el entrenador (solo si no existe una)."""
+    """
+    Crea una nueva partida para el entrenador. Si ya existe una partida, devuelve 400.
+
+    Args:
+        current_user (_type_, optional): _description_. Defaults to Depends(require_trainer).
+        db (Session, optional): _description_. Defaults to Depends(get_db).
+
+    Returns:
+        _type_: _description_
+    """
     return game_service.create_game_save(current_user.id, db)
 
 
 @router.put(
-    "/save", response_model=GameSaveRead, summary="Guardar partida (autosave / manual)"
-)
+    "/save", response_model=GameSaveRead)
 def save_game(
     payload: GameSaveUpdate,
     current_user=Depends(require_trainer),
     db: Session = Depends(get_db),
 ):
-    """Actualiza el estado de la partida del entrenador (posición, inventario, flags, etc.)."""
+    """
+    Su funcion es guardar el estado actual de la partida del entrenador.
+
+    Args:
+        payload (GameSaveUpdate): _description_
+        current_user (_type_, optional): _description_. Defaults to Depends(require_trainer).
+        db (Session, optional): _description_. Defaults to Depends(get_db).
+
+    Returns:
+        _type_: _description_
+    """
     return game_service.update_game_save(current_user.id, payload, db)
 
 
 @router.post(
     "/save/party/{slot_position}",
     response_model=GameSaveRead,
-    summary="Asignar pokémon a un slot de la party",
 )
 def set_party_slot(
     slot_position: int,
@@ -56,7 +81,18 @@ def set_party_slot(
     current_user=Depends(require_trainer),
     db: Session = Depends(get_db),
 ):
-    """Asigna un pokémon del trainer a un slot (0-5) de la party activa."""
+    """
+    Asigna un pokémon al slot indicado de la party activa.
+
+    Args:
+        slot_position (int): _description_
+        trainer_pokemon_id (int): _description_
+        current_user (_type_, optional): _description_. Defaults to Depends(require_trainer).
+        db (Session, optional): _description_. Defaults to Depends(get_db).
+
+    Returns:
+        _type_: _description_
+    """
     game_service.set_party_slot(current_user.id, trainer_pokemon_id, slot_position, db)
     return game_service.get_game_save_or_404(current_user.id, db)
 
@@ -64,13 +100,22 @@ def set_party_slot(
 @router.delete(
     "/save/party/{slot_position}",
     response_model=GameSaveRead,
-    summary="Remover pokémon de la party",
 )
 def remove_party_slot(
     slot_position: int,
     current_user=Depends(require_trainer),
     db: Session = Depends(get_db),
 ):
-    """Remueve un pokémon del slot indicado de la party activa."""
+    """
+    Elimina un pokémon del slot indicado de la party activa.
+
+    Args:
+        slot_position (int): _description_
+        current_user (_type_, optional): _description_. Defaults to Depends(require_trainer).
+        db (Session, optional): _description_. Defaults to Depends(get_db).
+
+    Returns:
+        _type_: _description_
+    """
     game_service.remove_party_slot(current_user.id, slot_position, db)
     return game_service.get_game_save_or_404(current_user.id, db)

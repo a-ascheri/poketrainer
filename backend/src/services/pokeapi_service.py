@@ -2,20 +2,16 @@ from typing import Any, Dict, List, Optional
 
 import httpx
 
-from src.schemas.pokemon import (
-    PokemonDataResponseSchema,
-    PokemonMoveSchema,
-    PokemonStatSchema,
-    PokemonTypeSchema,
-)
+from src.schemas.pokemon import (PokemonDataResponseSchema, PokemonMoveSchema,
+                                 PokemonStatSchema, PokemonTypeSchema)
 
 # Configuración de PokeAPI
 POKEAPI_BASE_URL = "https://pokeapi.co/api/v2"
-# Usaremos un cliente httpx para peticiones asíncronas
+# cliente httpx para peticiones asíncronas
 pokeapi_client = httpx.AsyncClient(base_url=POKEAPI_BASE_URL)
 
-# Cache en memoria simple (Para empezar, luego se puede integrar Redis) ---
-# Ojo: No es escalable si hay múltiples instancias del backend
+# Cache en memoria simple (Para empezar, luego se puede integrar Redis)
+# No es escalable si hay múltiples instancias del backend
 # y no persiste si el servidor se reinicia. Solo para demo/desarrollo inicial.
 pokeapi_cache: Dict[str, PokemonDataResponseSchema] = {}
 CACHE_TTL_SECONDS = 3600  # 1 hora
@@ -49,7 +45,7 @@ def _extract_moves(moves_data: List[Dict[str, Any]]) -> List[PokemonMoveSchema]:
                 registry[move_name] = learn_level
 
     # Convertir el registro a una lista de PokemonMoveSchema y ordenar
-    # Limitar a los primeros 20 movimientos como en el frontend original
+    # Limitar a los primeros 20 movimientos
     return sorted(
         [
             PokemonMoveSchema(name=name, learnLevel=level)
@@ -71,34 +67,37 @@ async def get_pokemon_data_from_pokeapi(
     """
     Obtiene y procesa datos de un Pokémon de la PokeAPI, con cacheo.
     Busca por nombre o ID.
+    
+    Returns:
+        PokemonDataResponseSchema si se encuentra el Pokémon
+        None si no se encuentra (404)
+        Lanza excepción para otros errores (400, 500, etc.)
     """
     normalized_query = query.strip().lower()
 
-    # 1. Intentar obtener de la caché
+    # Intentar obtener de la caché
     if normalized_query in pokeapi_cache:
-        # Aquí se podría añadir lógica de TTL para la caché
-        # Por ahora, simplemente devolvemos si está en caché
         return pokeapi_cache[normalized_query]
 
     try:
-        # 2. Realizar la primera llamada a PokeAPI para datos básicos
+        # Realizar la primera llamada a PokeAPI para datos básicos
         response = await pokeapi_client.get(f"/pokemon/{normalized_query}")
         response.raise_for_status()  # Lanza excepción para códigos de estado 4xx/5xx
         data = response.json()
 
-        # 3. Llamada para datos de la especie (para la cadena de evolución)
+        # Llamada para datos de la especie (para la cadena de evolución)
         species_response = await pokeapi_client.get(data["species"]["url"])
         species_response.raise_for_status()
         species_data = species_response.json()
 
-        # 4. Llamada para la cadena de evolución
+        # Llamada para la cadena de evolución
         evolution_response = await pokeapi_client.get(
             species_data["evolution_chain"]["url"]
         )
         evolution_response.raise_for_status()
         evolution_data = evolution_response.json()
 
-        # 5. Transformar los datos al formato de PokemonDataResponseSchema
+        # Transformar los datos al formato de PokemonDataResponseSchema
         pokemon_id = data["id"]
         processed_pokemon = PokemonDataResponseSchema(
             id=pokemon_id,
@@ -122,19 +121,26 @@ async def get_pokemon_data_from_pokeapi(
             ],
         )
 
-        # 6. Almacenar en la caché antes de devolver
+        # Almacenar en la caché antes de devolver
         pokeapi_cache[normalized_query] = processed_pokemon
         return processed_pokemon
+
 
     except httpx.HTTPStatusError as e:
         if e.response.status_code == 404:
             print(f"Pokémon '{query}' no encontrado en PokeAPI.")
-            return None
-        print(f"Error HTTP al consultar PokeAPI para '{query}': {e}")
-        raise  # Re-lanzar otros errores HTTP
+            return None  # 👈 Solo return None para 404
+        elif e.response.status_code == 400:
+            print(f"Nombre de Pokémon inválido para PokeAPI: '{query}'")
+            raise e  # 👈 Relanzar para que el endpoint capte 400
+        else:
+            print(f"Error HTTP {e.response.status_code} al consultar PokeAPI para '{query}': {e}")
+            raise e
+            
     except httpx.RequestError as e:
         print(f"Error de red al consultar PokeAPI para '{query}': {e}")
-        raise  # Re-lanzar errores de red
+        raise e
+        
     except Exception as e:
         print(f"Error inesperado al procesar datos de PokeAPI para '{query}': {e}")
-        raise  # Re-lanzar cualquier otro error inesperado
+        raise e

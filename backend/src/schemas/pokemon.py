@@ -118,36 +118,42 @@ class PokemonDataResponseSchema(BaseModel):
         from_attributes = True
 
 
+# src/schemas/pokemon.py
 class PokemonSearchInput(BaseModel):
     """
     Schema para validar el parámetro de búsqueda de Pokémon.
     Añade validaciones para números negativos y formato de texto.
     """
-
     query: str = Field(
         ...,
         min_length=1,
         max_length=100,
         description="Nombre o ID del Pokémon a buscar",
-        example="pikachu",
+        example="pikachu"
     )
 
-    @validator("query")
+    @validator('query')
     def validate_query_content(cls, v):
         stripped_query = v.strip()
         if not stripped_query:
-            raise ValueError(
-                "La consulta de búsqueda no puede estar vacía o consistir solo en espacios."
-            )
+            raise ValueError("La consulta de búsqueda no puede estar vacía o consistir solo en espacios.")
 
-        # Validación para números negativos o cero si la consulta es un número (ID de Pokémon)
-        if stripped_query.isdigit():
+        # 👇 VALIDACIÓN CORREGIDA PARA NÚMEROS 👇
+        # Verificar si es un número (incluyendo negativos)
+        is_negative = stripped_query.startswith('-') and stripped_query[1:].isdigit()
+        is_positive = stripped_query.isdigit()
+        
+        if is_negative or is_positive:
             pokemon_id = int(stripped_query)
             if pokemon_id <= 0:
                 raise ValueError("El ID del Pokémon no puede ser cero o negativo.")
+            if pokemon_id > 9999:  # Límite razonable de Pokémon
+                raise ValueError("El ID del Pokémon es demasiado alto (máximo 9999).")
+            # Si pasa la validación, devolvemos el número como string
+            return stripped_query
 
-        # Validación con Expresiones Regulares (ej. para nombres)
-        # La regex actual permite letras (unicode), números, espacios, guiones y apóstrofes.
+        # Validación para nombres (solo letras, números, espacios, guiones, apóstrofes)
+        # La regex permite letras (unicode), números, espacios, guiones y apóstrofes
         if not re.fullmatch(r"[\w\s\-\']+", stripped_query, re.UNICODE):
             raise ValueError(
                 "La consulta contiene caracteres no permitidos. "
