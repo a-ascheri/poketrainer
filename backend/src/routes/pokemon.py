@@ -1,3 +1,5 @@
+# src/routes/pokemon.py - versión corregida
+
 from typing import Optional
 
 import httpx
@@ -24,23 +26,7 @@ async def search_pokemon(
     db: Session = Depends(get_db),
 ) -> PokemonDataResponseSchema:
     """
-    Endpoint para buscar un Pokémon por nombre o ID. Valida la entrada usando Pydantic y maneja errores específicos de PokeAPI.
-
-    Args:
-        query_param (str, optional): _description_. Defaults to Path( ..., description="Nombre o ID del Pokémon a buscar", example="pikachu" ).
-        db (Session, optional): _description_. Defaults to Depends(get_db).
-
-    Raises:
-        HTTPException: _description_ se lanza cuando la validación de Pydantic falla, con detalles de los errores de validación.
-        HTTPException: _description_ se lanza cuando PokeAPI devuelve un error HTTP, con detalles específicos según el código de estado.
-        HTTPException: _description_ se lanza cuando PokeAPI devuelve un error de red o conexión.
-        HTTPException: _description_ se lanza cuando ocurre un error inesperado en PokeAPI.
-        HTTPException: _description_ se lanza cuando el Pokémon no se encuentra.
-        HTTPException: _description_ se lanza cuando ocurre un error interno del servidor.
-        HTTPException: _description_ se lanza cuando ocurre un error desconocido.
-
-    Returns:
-        PokemonDataResponseSchema: _description_
+    Endpoint para buscar un Pokémon por nombre o ID.
     """
     try:
         # 1. Validar la query usando schema Pydantic
@@ -75,7 +61,6 @@ async def search_pokemon(
         )
     
     except httpx.HTTPStatusError as e:
-        # Error HTTP de PokeAPI
         print(f"HTTPStatusError capturado: {e.response.status_code} para '{query_param}'")
         if e.response.status_code == 400:
             raise HTTPException(
@@ -101,11 +86,9 @@ async def search_pokemon(
         )
     
     except HTTPException:
-        # Relanzar HTTPException para que FastAPI las maneje correctamente
         raise
     
     except Exception as e:
-        # Cualquier otro error inesperado
         print(f"Error inesperado: {type(e).__name__}: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

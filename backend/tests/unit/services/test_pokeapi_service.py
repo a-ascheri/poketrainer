@@ -1,5 +1,3 @@
-# tests/unit/services/test_pokeapi_service.py
-
 import pytest
 from unittest.mock import AsyncMock, patch, MagicMock
 from httpx import HTTPStatusError, RequestError, Request, Response

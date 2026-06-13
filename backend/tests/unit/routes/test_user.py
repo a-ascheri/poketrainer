@@ -1,7 +1,7 @@
 # tests/unit/routes/test_user.py
 
 import pytest
-from unittest.mock import patch, AsyncMock, MagicMock
+from unittest.mock import patch, MagicMock
 from fastapi.testclient import TestClient
 import sys
 from pathlib import Path
@@ -10,9 +10,29 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
 from src.main import app
-from src.models.user import User
+from src.routes.auth_dependencies import get_current_user_entity
 
 client = TestClient(app)
+
+
+# Fixture para mockear autenticación
+@pytest.fixture
+def mock_auth():
+    mock_user = MagicMock()
+    mock_user.id = 1
+    mock_user.username = "trainer1"
+    mock_user.email = "trainer1@test.com"
+    mock_user.role = "trainer"
+    mock_user.is_active = True
+    mock_user.permissions = []
+    mock_user.force_password_change = False
+    mock_user.starter_pokemon_selected = False
+    
+    # Override de la dependencia
+    app.dependency_overrides[get_current_user_entity] = lambda: mock_user
+    yield mock_user
+    # Limpiar después
+    app.dependency_overrides.clear()
 
 
 class TestCreateUser:
@@ -113,31 +133,17 @@ class TestLogin:
 class TestGetProfile:
     """Tests para GET /api/v1/user/profile"""
     
-    @patch('src.routes.user.get_current_user_entity')
-    def test_get_profile_success(self, mock_get_user):
+    def test_get_profile_success(self, mock_auth):
         """Obtener perfil del usuario autenticado"""
-        mock_user = MagicMock()
-        mock_user.id = 1
-        mock_user.username = "trainer1"
-        mock_user.email = "trainer1@test.com"
-        mock_user.role = "trainer"
-        mock_user.is_active = True
-        mock_user.permissions = []
-        mock_user.force_password_change = False
-        mock_user.starter_pokemon_selected = False
-        mock_get_user.return_value = mock_user
+        response = client.get(
+            "/api/v1/user/profile",
+            headers={"Authorization": "Bearer fake_token"}
+        )
         
-        # Crear un token válido (mockeamos la dependencia)
-        with patch('src.routes.auth_dependencies.get_current_user_entity', return_value=mock_user):
-            response = client.get(
-                "/api/v1/user/profile",
-                headers={"Authorization": "Bearer fake_token"}
-            )
-            
-            # Como la dependencia está mockeada, debería funcionar
-            # Si falla, skip
-            if response.status_code != 200:
-                pytest.skip("Auth dependency mock issue")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["username"] == "trainer1"
+        assert data["email"] == "trainer1@test.com"
     
     def test_get_profile_unauthorized(self):
         """Sin token - 401"""
@@ -148,12 +154,9 @@ class TestGetProfile:
 class TestChangePassword:
     """Tests para POST /api/v1/user/change-password"""
     
-    @patch('src.routes.user.get_current_user_entity')
     @patch('src.routes.user.change_password')
-    def test_change_password_success(self, mock_change_password, mock_get_user):
+    def test_change_password_success(self, mock_change_password, mock_auth):
         """Cambio de contraseña exitoso"""
-        mock_user = MagicMock()
-        mock_get_user.return_value = mock_user
         mock_change_password.return_value = {"detail": "Password updated"}
         
         response = client.post(
@@ -165,11 +168,7 @@ class TestChangePassword:
             headers={"Authorization": "Bearer fake_token"}
         )
         
-        # Si la dependencia está mockeada, debería funcionar
-        if response.status_code == 401:
-            pytest.skip("Auth dependency mock issue")
-        else:
-            assert response.status_code == 200
+        assert response.status_code == 200
     
     def test_change_password_unauthorized(self):
         """Sin token - 401"""

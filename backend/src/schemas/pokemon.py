@@ -138,7 +138,6 @@ class PokemonSearchInput(BaseModel):
         if not stripped_query:
             raise ValueError("La consulta de búsqueda no puede estar vacía o consistir solo en espacios.")
 
-        # 👇 VALIDACIÓN CORREGIDA PARA NÚMEROS 👇
         # Verificar si es un número (incluyendo negativos)
         is_negative = stripped_query.startswith('-') and stripped_query[1:].isdigit()
         is_positive = stripped_query.isdigit()
@@ -147,8 +146,8 @@ class PokemonSearchInput(BaseModel):
             pokemon_id = int(stripped_query)
             if pokemon_id <= 0:
                 raise ValueError("El ID del Pokémon no puede ser cero o negativo.")
-            if pokemon_id > 9999:  # Límite razonable de Pokémon
-                raise ValueError("El ID del Pokémon es demasiado alto (máximo 9999).")
+            if pokemon_id > 1025:  # Límite razonable de Pokémon
+                raise ValueError("El ID del Pokémon es demasiado alto (máximo 1025).")
             # Si pasa la validación, devolvemos el número como string
             return stripped_query
 

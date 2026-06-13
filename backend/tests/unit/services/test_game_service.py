@@ -1,5 +1,3 @@
-# tests/unit/services/test_game_service.py
-
 import pytest
 from unittest.mock import Mock, patch, MagicMock
 from fastapi import HTTPException

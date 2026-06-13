@@ -1,5 +1,3 @@
-# tests/unit/routes/test_game.py - versión corregida
-
 import pytest
 from unittest.mock import patch, MagicMock, ANY
 from fastapi.testclient import TestClient

@@ -66,12 +66,6 @@ async def get_pokemon_data_from_pokeapi(
 ) -> Optional[PokemonDataResponseSchema]:
     """
     Obtiene y procesa datos de un Pokémon de la PokeAPI, con cacheo.
-    Busca por nombre o ID.
-    
-    Returns:
-        PokemonDataResponseSchema si se encuentra el Pokémon
-        None si no se encuentra (404)
-        Lanza excepción para otros errores (400, 500, etc.)
     """
     normalized_query = query.strip().lower()
 
@@ -79,10 +73,16 @@ async def get_pokemon_data_from_pokeapi(
     if normalized_query in pokeapi_cache:
         return pokeapi_cache[normalized_query]
 
+    # Validación temprana de ID
+    if normalized_query.isdigit():
+        pokemon_id = int(normalized_query)
+        if pokemon_id > 1025:  # Mismo límite que Pydantic
+            print(f"ID {pokemon_id} excede el límite de Pokémon conocidos (1025)")
+            return None  # Retorna None para que el endpoint maneje 404
+
     try:
-        # Realizar la primera llamada a PokeAPI para datos básicos
         response = await pokeapi_client.get(f"/pokemon/{normalized_query}")
-        response.raise_for_status()  # Lanza excepción para códigos de estado 4xx/5xx
+        response.raise_for_status()
         data = response.json()
 
         # Llamada para datos de la especie (para la cadena de evolución)
@@ -129,10 +129,10 @@ async def get_pokemon_data_from_pokeapi(
     except httpx.HTTPStatusError as e:
         if e.response.status_code == 404:
             print(f"Pokémon '{query}' no encontrado en PokeAPI.")
-            return None  # 👈 Solo return None para 404
+            return None
         elif e.response.status_code == 400:
             print(f"Nombre de Pokémon inválido para PokeAPI: '{query}'")
-            raise e  # 👈 Relanzar para que el endpoint capte 400
+            raise e
         else:
             print(f"Error HTTP {e.response.status_code} al consultar PokeAPI para '{query}': {e}")
             raise e

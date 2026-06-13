@@ -1,4 +1,4 @@
-# tests/unit/services/test_pokemon_service.py (versión corregida y completa)
+# tests/unit/services/test_pokemon_service.py
 
 import pytest
 from unittest.mock import Mock, patch, MagicMock
@@ -113,7 +113,6 @@ class TestLoadPokemonPayload:
         """Carga un nuevo Pokémon (cache miss)"""
         mock_fetch_json.return_value = {"id": 25, "name": "pikachu"}
         
-        # Limpiar cache antes de la prueba
         import src.services.pokemon_service as ps
         ps._pokemon_cache.clear()
         
@@ -130,13 +129,11 @@ class TestLoadPokemonPayload:
         import src.services.pokemon_service as ps
         ps._pokemon_cache.clear()
         
-        # Primera llamada
         result1 = _load_pokemon_payload("pikachu")
-        # Segunda llamada (debería usar cache)
         result2 = _load_pokemon_payload("pikachu")
         
         assert result1 == result2
-        assert mock_fetch_json.call_count == 1  # Solo una llamada real
+        assert mock_fetch_json.call_count == 1
     
     @patch("src.services.pokemon_service._fetch_json")
     def test_load_pokemon_payload_by_id(self, mock_fetch_json):
@@ -206,7 +203,7 @@ class TestExtractMoves:
         
         result = _extract_moves(payload)
         
-        assert result[0]["learn_level"] == 1  # El nivel más bajo
+        assert result[0]["learn_level"] == 1
 
 
 class TestExtractEvolutionNames:
@@ -254,7 +251,6 @@ class TestKnownMovesForLevel:
         
         result = _known_moves_for_level(moves, 10)
         
-        # Solo moves con learn_level <= 10, máximo 4
         assert len(result) == 3
         assert result[0]["name"] == "tackle"
         assert result[2]["name"] == "vine-whip"
@@ -272,7 +268,7 @@ class TestKnownMovesForLevel:
         result = _known_moves_for_level(moves, 10)
         
         assert len(result) == 4
-        assert result[0]["name"] == "move2"  # Los últimos 4
+        assert result[0]["name"] == "move2"
 
 
 class TestBuildPokemonModel:
@@ -302,7 +298,7 @@ class TestBuildPokemonModel:
 
 
 class TestGetOrCreatePokemon:
-    """Tests para get_or_create_pokemon - cubre línea 172"""
+    """Tests para get_or_create_pokemon"""
     
     @patch("src.services.pokemon_service._load_pokemon_payload")
     @patch("src.services.pokemon_service._load_evolution_chain")
@@ -328,8 +324,7 @@ class TestGetOrCreatePokemon:
     
     @patch("src.services.pokemon_service._load_pokemon_payload")
     def test_get_existing_pokemon(self, mock_load, db_session):
-        """Pokémon ya existe en DB - línea 172"""
-        # Crear Pokémon existente
+        """Pokémon ya existe en DB"""
         pokemon = Pokemon(pokeapi_id=1, name="bulbasaur", types=[], abilities=[], base_stats={}, moves=[], evolution_chain={})
         db_session.add(pokemon)
         db_session.commit()
@@ -339,7 +334,6 @@ class TestGetOrCreatePokemon:
         result = get_or_create_pokemon(db_session, "bulbasaur")
         
         assert result.id == pokemon.id
-        # No debería crear uno nuevo
         assert db_session.query(Pokemon).count() == 1
 
 
@@ -356,8 +350,8 @@ class TestListStarters:
         assert mock_get_or_create.call_count == 3
 
 
-class TestGainExperienceLevelUp:
-    """Tests para gain_experience - cubre líneas 233-245 (level up)"""
+class TestGainExperience:
+    """Tests para gain_experience"""
     
     def test_gain_experience_invalid_amount(self, db_session):
         trainer = User(username="trainer", email="trainer@test.com", hashed_password="hash")
@@ -398,7 +392,6 @@ class TestGainExperienceLevelUp:
         db_session.add(owned)
         db_session.commit()
         
-        # Dar suficiente experiencia para subir de nivel
         result = gain_experience(db_session, trainer, owned.id, 10000)
         
         assert result.current_level > 5
@@ -419,7 +412,7 @@ class TestGetOwnedPokemonOr404:
         assert exc_info.value.status_code == 404
 
 
-# Necesitamos fixtures para db_session
+# Fixture para db_session
 @pytest.fixture
 def db_session():
     from sqlalchemy import create_engine
