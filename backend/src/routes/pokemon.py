@@ -24,22 +24,26 @@ async def search_pokemon(
     db: Session = Depends(get_db),
 ) -> PokemonDataResponseSchema:
     """
-    Endpoint para buscar un Pokémon por nombre o ID. Valida la entrada usando Pydantic y maneja errores de manera robusta.
-        - Valida que la query sea un nombre o ID válido (no negativos, no caracteres especiales, no números muy grandes).
-        - Maneja errores HTTP de PokeAPI (400 para caracteres inválidos, 404 para no encontrado).
-        - Maneja errores de conexión a PokeAPI y otros errores inesperados, proporcionando mensajes claros al cliente. 
-        
-        Args:
-            query_param (str): Nombre o ID del Pokémon a buscar, validado por Pydantic.
-            db (Session): Sesión de base de datos, inyectada por Depends.
-        
-        Returns:
-            PokemonDataResponseSchema: Datos del Pokémon encontrado. 
-        
-        HTTPException: Si la validación falla, si el Pokémon no se encuentra, o si hay errores de conexión o inesperados."""
+    Endpoint para buscar un Pokémon por nombre o ID. Valida la entrada usando Pydantic y maneja errores específicos de PokeAPI.
+
+    Args:
+        query_param (str, optional): _description_. Defaults to Path( ..., description="Nombre o ID del Pokémon a buscar", example="pikachu" ).
+        db (Session, optional): _description_. Defaults to Depends(get_db).
+
+    Raises:
+        HTTPException: _description_ se lanza cuando la validación de Pydantic falla, con detalles de los errores de validación.
+        HTTPException: _description_ se lanza cuando PokeAPI devuelve un error HTTP, con detalles específicos según el código de estado.
+        HTTPException: _description_ se lanza cuando PokeAPI devuelve un error de red o conexión.
+        HTTPException: _description_ se lanza cuando ocurre un error inesperado en PokeAPI.
+        HTTPException: _description_ se lanza cuando el Pokémon no se encuentra.
+        HTTPException: _description_ se lanza cuando ocurre un error interno del servidor.
+        HTTPException: _description_ se lanza cuando ocurre un error desconocido.
+
+    Returns:
+        PokemonDataResponseSchema: _description_
+    """
     try:
         # 1. Validar la query usando schema Pydantic
-        # Esto capturará: -1, 0, números muy grandes, caracteres especiales
         search_input = PokemonSearchInput(query=query_param)
         validated_query = search_input.query
 
@@ -55,7 +59,7 @@ async def search_pokemon(
         return pokemon_data
 
     except ValidationError as e:
-        # Validación de Pydantic falló (números negativos, cero, caracteres inválidos)
+        # Validación de Pydantic falló
         errors = []
         for error in e.errors():
             errors.append(
@@ -71,7 +75,7 @@ async def search_pokemon(
         )
     
     except httpx.HTTPStatusError as e:
-        # Error HTTP de PokeAPI (400 para caracteres especiales como "ñoño")
+        # Error HTTP de PokeAPI
         print(f"HTTPStatusError capturado: {e.response.status_code} para '{query_param}'")
         if e.response.status_code == 400:
             raise HTTPException(
@@ -95,6 +99,10 @@ async def search_pokemon(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="No se pudo conectar con PokeAPI. Intenta más tarde."
         )
+    
+    except HTTPException:
+        # Relanzar HTTPException para que FastAPI las maneje correctamente
+        raise
     
     except Exception as e:
         # Cualquier otro error inesperado
