@@ -1,7 +1,6 @@
 from fastapi import APIRouter
 
-from src.routes.prefixes import (API_V1_PREFIX, GAME_TRAINER_PREFIX,
-                                 SYSTEM_PREFIX)
+from src.routes.prefixes import API_V1_PREFIX, GAME_TRAINER_PREFIX, SYSTEM_PREFIX
 
 router = APIRouter(tags=["System"])
 

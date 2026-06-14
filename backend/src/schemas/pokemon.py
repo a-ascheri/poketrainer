@@ -124,24 +124,27 @@ class PokemonSearchInput(BaseModel):
     Schema para validar el parámetro de búsqueda de Pokémon.
     Añade validaciones para números negativos y formato de texto.
     """
+
     query: str = Field(
         ...,
         min_length=1,
         max_length=100,
         description="Nombre o ID del Pokémon a buscar",
-        example="pikachu"
+        example="pikachu",
     )
 
-    @validator('query')
+    @validator("query")
     def validate_query_content(cls, v):
         stripped_query = v.strip()
         if not stripped_query:
-            raise ValueError("La consulta de búsqueda no puede estar vacía o consistir solo en espacios.")
+            raise ValueError(
+                "La consulta de búsqueda no puede estar vacía o consistir solo en espacios."
+            )
 
         # Verificar si es un número (incluyendo negativos)
-        is_negative = stripped_query.startswith('-') and stripped_query[1:].isdigit()
+        is_negative = stripped_query.startswith("-") and stripped_query[1:].isdigit()
         is_positive = stripped_query.isdigit()
-        
+
         if is_negative or is_positive:
             pokemon_id = int(stripped_query)
             if pokemon_id <= 0:

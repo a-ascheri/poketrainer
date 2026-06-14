@@ -1,5 +1,3 @@
-# src/routes/pokemon.py - versión corregida
-
 from typing import Optional
 
 import httpx
@@ -27,6 +25,25 @@ async def search_pokemon(
 ) -> PokemonDataResponseSchema:
     """
     Endpoint para buscar un Pokémon por nombre o ID.
+
+    Args:
+        query_param (str, optional): _description_. Defaults to Path( ..., description="Nombre o ID del Pokémon a buscar", example="pikachu" ).
+        db (Session, optional): _description_. Defaults to Depends(get_db).
+
+    Raises:
+        HTTPException: _description_ se lanza si la validación de Pydantic falla, si el Pokémon no se encuentra, o si hay errores de conexión con PokeAPI.
+        HTTPException: _description_ se lanza para errores de validación específicos, como formato inválido del nombre del Pokémon.
+        HTTPException: _description_ se lanza para errores de conexión o respuesta de PokeAPI, como 400 Bad Request o 404 Not Found.
+        HTTPException: _description_ se lanza para errores inesperados en el servidor, con un mensaje genérico para el cliente.
+        HTTPException: _description_ se lanza para errores de validación de Pydantic, con detalles específicos sobre los campos que fallaron.
+        HTTPException: _description_ se lanza para errores de conexión a PokeAPI, con un mensaje específico para el cliente sobre la imposibilidad de conectar.
+        HTTPException: _description_ se lanza para errores de tiempo de espera al conectar con PokeAPI.
+        HTTPException: _description_ se lanza para errores de respuesta de PokeAPI, con detalles específicos sobre el código de error recibido.
+        HTTPException: _description_ se lanza para errores inesperados en el servidor, con un mensaje genérico para el cliente.
+        HTTPException: _description_ se lanza para errores de validación de Pydantic, con detalles específicos sobre los campos que fallaron.
+
+    Returns:
+        PokemonDataResponseSchema: _description_
     """
     try:
         # 1. Validar la query usando schema Pydantic
@@ -59,38 +76,40 @@ async def search_pokemon(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail={"message": "Error de validación en la búsqueda", "errors": errors},
         )
-    
+
     except httpx.HTTPStatusError as e:
-        print(f"HTTPStatusError capturado: {e.response.status_code} para '{query_param}'")
+        print(
+            f"HTTPStatusError capturado: {e.response.status_code} para '{query_param}'"
+        )
         if e.response.status_code == 400:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Nombre de Pokémon inválido: '{query_param}'. Usa solo letras, números, guiones o apóstrofes."
+                detail=f"Nombre de Pokémon inválido: '{query_param}'. Usa solo letras, números, guiones o apóstrofes.",
             )
         elif e.response.status_code == 404:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Pokémon '{query_param}' no encontrado."
+                detail=f"Pokémon '{query_param}' no encontrado.",
             )
         else:
             raise HTTPException(
                 status_code=status.HTTP_502_BAD_GATEWAY,
-                detail=f"Error de PokeAPI: {e.response.status_code}"
+                detail=f"Error de PokeAPI: {e.response.status_code}",
             )
-    
+
     except httpx.RequestError as e:
         print(f"RequestError capturado: {e}")
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="No se pudo conectar con PokeAPI. Intenta más tarde."
+            detail="No se pudo conectar con PokeAPI. Intenta más tarde.",
         )
-    
+
     except HTTPException:
         raise
-    
+
     except Exception as e:
         print(f"Error inesperado: {type(e).__name__}: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Ocurrió un error inesperado en el servidor."
+            detail="Ocurrió un error inesperado en el servidor.",
         )

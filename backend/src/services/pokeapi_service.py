@@ -2,8 +2,12 @@ from typing import Any, Dict, List, Optional
 
 import httpx
 
-from src.schemas.pokemon import (PokemonDataResponseSchema, PokemonMoveSchema,
-                                 PokemonStatSchema, PokemonTypeSchema)
+from src.schemas.pokemon import (
+    PokemonDataResponseSchema,
+    PokemonMoveSchema,
+    PokemonStatSchema,
+    PokemonTypeSchema,
+)
 
 # Configuración de PokeAPI
 POKEAPI_BASE_URL = "https://pokeapi.co/api/v2"
@@ -125,7 +129,6 @@ async def get_pokemon_data_from_pokeapi(
         pokeapi_cache[normalized_query] = processed_pokemon
         return processed_pokemon
 
-
     except httpx.HTTPStatusError as e:
         if e.response.status_code == 404:
             print(f"Pokémon '{query}' no encontrado en PokeAPI.")
@@ -134,13 +137,15 @@ async def get_pokemon_data_from_pokeapi(
             print(f"Nombre de Pokémon inválido para PokeAPI: '{query}'")
             raise e
         else:
-            print(f"Error HTTP {e.response.status_code} al consultar PokeAPI para '{query}': {e}")
+            print(
+                f"Error HTTP {e.response.status_code} al consultar PokeAPI para '{query}': {e}"
+            )
             raise e
-            
+
     except httpx.RequestError as e:
         print(f"Error de red al consultar PokeAPI para '{query}': {e}")
         raise e
-        
+
     except Exception as e:
         print(f"Error inesperado al procesar datos de PokeAPI para '{query}': {e}")
         raise e
