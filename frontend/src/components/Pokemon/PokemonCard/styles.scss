@@ -38,10 +38,10 @@
   max-height: 180px;
   width: 100%;
 
-  aspect-ratio: 1 / 1;  // 👈 Mantiene proporción cuadrada 1:1
-  object-fit: contain;   // 👈 La imagen no se corta, se ajusta
+  aspect-ratio: 1 / 1;  // Mantiene proporción cuadrada 1:1
+  object-fit: contain;  // La imagen no se corta, se ajusta
   
-  margin: 0 auto;        // 👈 Centrar
+  margin: 0 auto;       // Centrar
 
 }
 

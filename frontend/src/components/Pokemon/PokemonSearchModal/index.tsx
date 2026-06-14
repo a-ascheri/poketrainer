@@ -11,7 +11,7 @@ interface PokemonSearchModalProps {
   onClose: () => void;
 }
 
-// 🔧 Validación client-side SOLO para UX (no bloqueante, solo para mostrar ayuda)
+// Validación client-side SOLO para UX (no bloqueante, solo para mostrar ayuda)
 const getClientSideHint = (query: string): string | null => {
   const trimmed = query.trim();
   if (!trimmed) return null;
@@ -20,7 +20,7 @@ const getClientSideHint = (query: string): string | null => {
   if (isNumber) {
     const id = parseInt(trimmed, 10);
     if (id > 1025) {
-      return `⚠️ El ID ${id} es mayor a 1025. Es probable que no exista en la Pokédex.`;
+      return `⚠️ El ID es mayor a 1025. Es probable que no exista en la Pokédex.`;
     }
   }
   return null;
