@@ -85,7 +85,7 @@ export default function PokemonSearchModal({ isOpen, onClose }: PokemonSearchMod
     setPokemonData(null);
 
     try {
-      // 🔧 Enviamos la request SIN filtrar - el backend decide
+      // Enviamos la request SIN filtrar - el backend decide
       const encodedQuery = encodeURIComponent(trimmed.toLowerCase());
       const response = await fetch(`/api/v1/pokemon/${encodedQuery}`);
       

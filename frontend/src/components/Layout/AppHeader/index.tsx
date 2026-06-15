@@ -16,8 +16,8 @@ const AppHeader = () => {
       <div className="app-header__brand">
         <span className="app-header__ball" aria-hidden="true" />
         <div>
-          <p className="app-header__subtitle">PokeTrainer</p>
-          <h1 className="app-header__title">Pokédex Hub</h1>
+          <p className="app-header__subtitle">PokeTraining</p>
+          <h1 className="app-header__title">Poké Hub</h1>
         </div>
       </div>
 
