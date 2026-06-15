@@ -53,3 +53,4 @@ def verify_access_token(token: str) -> Optional[Dict[str, Any]]:
     except (AttributeError, ValueError):
         # Error por formato inválido del token (None, mal formado, etc.)
         return None
+    
