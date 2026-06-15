@@ -219,4 +219,3 @@ class TestVerifyAccessTokenEdgeCases:
         
         payload = verify_access_token("any.token.here")
         assert payload is None
-        
