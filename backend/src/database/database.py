@@ -23,7 +23,7 @@ engine = None
 # Importa create_engine SOLO cuando sea necesario,
 # evitando errores de importación temprana con psycopg2.
 def setup_engine(url: str = None):
-    # global engine, SessionLocal
+    global engine, SessionLocal
     # Importación diferida
     from sqlalchemy import create_engine
 
