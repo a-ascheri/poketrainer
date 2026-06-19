@@ -50,7 +50,7 @@ def create_user(user: UserCreate, db: Session):
         hashed_password=hashed_password,
         role=TRAINER_ROLE,
         permissions=[],
-        force_password_change=False,
+        force_password_change=True,
         starter_pokemon_selected=False,
         is_active=True,
     )

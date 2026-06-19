@@ -44,7 +44,14 @@ export const login = async (payload: LoginPayload): Promise<TokenResponse> => {
 };
 
 export const register = async (payload: RegisterPayload): Promise<void> => {
-  await backendClient.post(API_ROUTES.user.register, payload);
+  const body = new URLSearchParams({
+    username: payload.username,
+    email: payload.email,
+    password: payload.password,
+  });
+  await backendClient.post(API_ROUTES.user.register, body, {
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+  });
 };
 
 export const getCurrentUserProfile = async (): Promise<UserProfile> => {
@@ -61,3 +68,4 @@ export const changePassword = async (
     new_password: newPassword,
   });
 };
+

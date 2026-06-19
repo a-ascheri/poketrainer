@@ -67,6 +67,12 @@ export class WorldScene extends Phaser.Scene {
     // trainer.png: 64×64 spritesheet, 4 cols × 4 rows
     // Row 0 (0-3): walk-down  Row 1 (4-7): walk-up
     // Row 2 (8-11): walk-left  Row 3 (12-15): walk-right
+
+    // Cargar el segundo tileset si existe o agregar mas como este para mas mapas
+    if (def.tilesetKey2 && def.tilesetUrl2) {
+      this.load.image(def.tilesetKey2, def.tilesetUrl2);
+    }
+
     this.load.spritesheet('trainer', '/sprites/trainer.png', {
       frameWidth: TILE_SIZE,
       frameHeight: TILE_SIZE,
@@ -74,57 +80,71 @@ export class WorldScene extends Phaser.Scene {
   }
 
   create(): void {
-    const def = this.currentMapDef;
-    const map = this.make.tilemap({ key: def.jsonKey });
-    const tileset = map.addTilesetImage(def.tilesetKey, def.tilesetKey);
-
-    if (!tileset) {
-      console.error(`[WorldScene] Failed to load tileset "${def.tilesetKey}"`);
-      return;
-    }
-
-    map.createLayer(def.groundLayer, tileset, 0, 0);
-    this.objectLayer = map.createLayer(def.objectLayer, tileset, 0, 0)!;
-    // All non-empty tiles in the objects layer block movement
-    this.objectLayer.setCollisionByExclusion([-1]);
-
-    this.mapWidthPx  = map.widthInPixels;
-    this.mapHeightPx = map.heightInPixels;
-
-    const startX = this._initTileX * TILE_SIZE + TILE_SIZE / 2;
-    const startY = this._initTileY * TILE_SIZE + TILE_SIZE / 2;
-    this.player = this.physics.add.sprite(startX, startY, 'trainer', 0);
-    this.player.setDepth(5);
-    this.player.body.setSize(10, 10);
-
-    this.physics.add.collider(this.player, this.objectLayer);
-
-    this.cameras.main.setBounds(0, 0, this.mapWidthPx, this.mapHeightPx);
-    this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
-    this.cameras.main.fadeIn(300, 0, 0, 0);
-
-    this.cursors = this.input.keyboard!.createCursorKeys();
-    this.interactKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
-    this._createAnimations();
-
-    this.posText = this.add
-      .text(8, 8, def.label, {
-        fontSize: '9px',
-        color: '#ffffff',
-        backgroundColor: '#000000aa',
-        padding: { x: 3, y: 2 },
-      })
-      .setScrollFactor(0)
-      .setDepth(10);
-
-    // Autosave every 30 s
-    this.time.addEvent({
-      delay: 30_000,
-      loop: true,
-      callback: this._autosave,
-      callbackScope: this,
-    });
+  const def = this.currentMapDef;
+  const map = this.make.tilemap({ key: def.jsonKey });
+  
+  // Cargar el primer tileset
+  const tileset1 = map.addTilesetImage(def.tilesetKey, def.tilesetKey);
+  
+  if (!tileset1) {
+    console.error(`[WorldScene] Failed to load tileset "${def.tilesetKey}"`);
+    return;
   }
+  
+  // Crear array con todos los tilesets
+  const tilesets: Phaser.Tilemaps.Tileset[] = [tileset1];
+  
+  // Cargar el segundo tileset si existe
+  if (def.tilesetKey2) {
+    const tileset2 = map.addTilesetImage(def.tilesetKey2, def.tilesetKey2);
+    if (tileset2) {
+      tilesets.push(tileset2);
+    } else {
+      console.warn(`[WorldScene] Failed to load second tileset "${def.tilesetKey2}"`);
+    }
+  }
+  
+  // Crear las capas usando TODOS los tilesets
+  map.createLayer(def.groundLayer, tilesets, 0, 0);
+  this.objectLayer = map.createLayer(def.objectLayer, tilesets, 0, 0)!;
+  this.objectLayer.setCollisionByExclusion([-1]);
+  
+  this.mapWidthPx = map.widthInPixels;
+  this.mapHeightPx = map.heightInPixels;
+  
+  const startX = this._initTileX * TILE_SIZE + TILE_SIZE / 2;
+  const startY = this._initTileY * TILE_SIZE + TILE_SIZE / 2;
+  this.player = this.physics.add.sprite(startX, startY, 'trainer', 0);
+  this.player.setDepth(5);
+  this.player.body.setSize(10, 10);
+  
+  this.physics.add.collider(this.player, this.objectLayer);
+  
+  this.cameras.main.setBounds(0, 0, this.mapWidthPx, this.mapHeightPx);
+  this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
+  this.cameras.main.fadeIn(300, 0, 0, 0);
+  
+  this.cursors = this.input.keyboard!.createCursorKeys();
+  this.interactKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+  this._createAnimations();
+  
+  this.posText = this.add
+    .text(8, 8, def.label, {
+      fontSize: '9px',
+      color: '#ffffff',
+      backgroundColor: '#000000aa',
+      padding: { x: 3, y: 2 },
+    })
+    .setScrollFactor(0)
+    .setDepth(10);
+  
+  this.time.addEvent({
+    delay: 30_000,
+    loop: true,
+    callback: this._autosave,
+    callbackScope: this,
+  });
+}
 
   update(): void {
     if (!this.cursors || !this.player || this._transitioning) return;

@@ -4,6 +4,7 @@ import time
 from authlib.oauth2.rfc7636 import create_s256_code_challenge
 from fastapi import APIRouter, Depends, Form, HTTPException
 from sqlalchemy.orm import Session
+from pydantic import EmailStr
 
 from src.routes.auth_dependencies import get_current_user_entity
 from src.routes.prefixes import USER_PREFIX
@@ -20,18 +21,24 @@ router = APIRouter(prefix=USER_PREFIX, tags=["User"])
 
 
 @router.post("/register", response_model=UserRead)
-def create_user(user: UserCreate, db: Session = Depends(get_db)):
+def create_user(
+    username: str = Form(...),
+    email: EmailStr = Form(...),
+    password: str = Form(...),
+    db: Session = Depends(get_db),
+):
     """
     Crea un usuario con rol trainer para acceso al juego.
-
     Args:
-        user (UserCreate): Datos del usuario a crear.
+        username (str): Nombre de usuario.
+        email (EmailStr): Correo electrónico del usuario.
+        password (str): Contraseña del usuario.
         db (Session): Sesión de base de datos.
-
     Returns:
         UserRead: Usuario creado.
     """
-    return create_user_service(user, db)
+    user_in = UserCreate(username=username, email=email, password=password)
+    return create_user_service(user_in, db)
 
 
 @router.get("/authorize")
@@ -46,7 +53,6 @@ async def authorize(
 ):
     """
     Autoriza a un usuario y genera un código de autorización temporal (PKCE).
-
     Args:
         client_id (str): ID del cliente OAuth.
         redirect_uri (str): URI de redirección.
@@ -55,7 +61,6 @@ async def authorize(
         username (str): Nombre de usuario.
         password (str): Contraseña.
         db (Session): Sesión de base de datos.
-
     Returns:
         dict: Código de autorización y URI de redirección.
     """
@@ -194,3 +199,4 @@ def get_profile(current_user=Depends(get_current_user_entity)):
         UserRead: Perfil del usuario autenticado.
     """
     return current_user
+

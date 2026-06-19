@@ -40,36 +40,23 @@ export interface MapConnection {
 
 export interface MapDef {
   key: string;
-  /** Human-readable name shown on screen. */
   label: string;
-  /** Phaser asset key used with load.tilemapTiledJSON. Must be unique across all maps. */
   jsonKey: string;
-  /** Public URL of the Tiled JSON file (relative to /public). */
   jsonUrl: string;
-  /** Phaser texture key for the shared tileset image. */
   tilesetKey: string;
-  /** Public URL of the tileset image (relative to /public). */
   tilesetUrl: string;
-  /** Map width in tiles (must match the Tiled JSON "width" field). */
+  tilesetKey2?: string;
+  tilesetUrl2?: string;
   widthInTiles: number;
-  /** Map height in tiles (must match the Tiled JSON "height" field). */
   heightInTiles: number;
-  /** Name of the ground layer inside the Tiled JSON. */
   groundLayer: string;
-  /** Name of the collision/objects layer inside the Tiled JSON. */
   objectLayer: string;
-  /** Edge connections to neighbouring maps. Omit an edge to close it. */
   connections: {
     top?: MapConnection;
     bottom?: MapConnection;
     left?: MapConnection;
     right?: MapConnection;
   };
-  /**
-   * Interactive signs/noticeboards on this map.
-   * When the player faces a tile at (tileX, tileY) and presses the interact button,
-   * the `text` is displayed as a dialog.
-   */
   signs?: Array<{ tileX: number; tileY: number; text: string }>;
 }
 
@@ -81,6 +68,8 @@ export const MAP_REGISTRY: Record<string, MapDef> = {
     jsonUrl: '/maps/pallet_town.json',
     tilesetKey: 'pokemonlike',
     tilesetUrl: '/tilesets/pokemonlike.png',
+    tilesetKey2: 'tilemap',        // ← AGREGAR ESTO
+    tilesetUrl2: '/tilesets/tilemap.png',  // ← AGREGAR ESTO, agregar mas referencias y agregarlas al worldscene para mas mapas
     widthInTiles: 40,
     heightInTiles: 40,
     groundLayer: 'ground',
@@ -101,6 +90,8 @@ export const MAP_REGISTRY: Record<string, MapDef> = {
     jsonUrl: '/maps/route_1.json',
     tilesetKey: 'pokemonlike',
     tilesetUrl: '/tilesets/pokemonlike.png',
+    tilesetKey2: 'tilemap',        // ← AGREGAR ESTO
+    tilesetUrl2: '/tilesets/tilemap.png',  // ← AGREGAR ESTO
     widthInTiles: 40,
     heightInTiles: 60,
     groundLayer: 'ground',
