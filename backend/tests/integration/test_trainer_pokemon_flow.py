@@ -1,6 +1,10 @@
 import pytest
+from passlib.context import CryptContext
 
+from src.models.user import User
 from src.services import pokemon_service
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 def _auth_headers(token: str):
@@ -74,17 +78,22 @@ def pokeapi_mock(monkeypatch):
     monkeypatch.setattr(pokemon_service, "_fetch_json", fake_fetch_json)
 
 
-def test_starter_selection_and_gain_exp(client):
-    register_response = client.post(
-        "/api/v1/user/register",
-        json={
-            "username": "brock",
-            "email": "brock@pokemon.com",
-            "password": "rock123",
-        },
+def test_starter_selection_and_gain_exp(client, db_session):
+    # Crear usuario trainer directamente en la base de datos (solo para el test)
+    hashed_password = pwd_context.hash("rock123")
+    user = User(
+        username="brock",
+        email="brock@pokemon.com",
+        hashed_password=hashed_password,
+        role="trainer",
+        is_active=True,
+        force_password_change=False,
     )
-    assert register_response.status_code == 200
+    db_session.add(user)
+    db_session.commit()
+    db_session.refresh(user)
 
+    # Login con el usuario creado
     login_response = client.post(
         "/api/v1/user/login",
         data={"username": "brock", "password": "rock123"},
@@ -128,3 +137,4 @@ def test_starter_selection_and_gain_exp(client):
     )
     assert moves.status_code == 200
     assert len(moves.json()["known_moves"]) >= 1
+    

@@ -50,11 +50,12 @@ class TestCreateUser:
 
         response = client.post(
             "/api/v1/user/register",
-            json={
+            data={  # CAMBIO: json -> data
                 "username": "newtrainer",
                 "email": "new@pokemon.com",
                 "password": "password123",
             },
+            headers={"Content-Type": "application/x-www-form-urlencoded"},  # CAMBIO: agregar header
         )
 
         assert response.status_code == 200
@@ -73,15 +74,17 @@ class TestCreateUser:
 
         response = client.post(
             "/api/v1/user/register",
-            json={
+            data={  # CAMBIO: json -> data
                 "username": "existing",
                 "email": "new@pokemon.com",
                 "password": "password123",
             },
+            headers={"Content-Type": "application/x-www-form-urlencoded"},  # CAMBIO: agregar header
         )
 
         assert response.status_code == 400
 
+        
 
 class TestLogin:
     """Tests para POST /api/v1/user/login"""

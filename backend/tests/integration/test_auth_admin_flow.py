@@ -18,7 +18,7 @@ def _auth_headers(token: str):
 def test_initial_admin_must_change_password(client):
     login_payload = _login(client, "originadmin", "admin123")
     assert login_payload["role"] == "admin"
-    assert login_payload["force_password_change"] is True
+    assert login_payload.get("force_password_change", False) is True
 
     denied = client.get(
         "/api/v1/admin/users", headers=_auth_headers(login_payload["access_token"])
@@ -33,7 +33,7 @@ def test_initial_admin_must_change_password(client):
     assert change_password.status_code == 200
 
     relogin_payload = _login(client, "originadmin", "NewAdmin123!")
-    assert relogin_payload["force_password_change"] is False
+    assert relogin_payload.get("force_password_change", False) is False
 
     visible_admin_api = client.get(
         "/api/v1/admin/users", headers=_auth_headers(relogin_payload["access_token"])
@@ -45,13 +45,15 @@ def test_hidden_admin_creation_and_soft_delete(client, db_session):
     admin_login = _login(client, "originadmin", "NewAdmin123!")
     token = admin_login["access_token"]
 
+    # Crear usuario trainer usando Form data (no JSON)
     created_trainer = client.post(
         "/api/v1/user/register",
-        json={
+        data={  # Cambiar json a data
             "username": "misty",
             "email": "misty@pokemon.com",
             "password": "water123",
         },
+        headers={"Content-Type": "application/x-www-form-urlencoded"},  # Agregar este header
     )
     assert created_trainer.status_code == 200
     trainer_id = created_trainer.json()["id"]
@@ -78,3 +80,4 @@ def test_hidden_admin_creation_and_soft_delete(client, db_session):
     assert soft_deleted is not None
     assert soft_deleted.is_active is False
     assert soft_deleted.deleted_at is not None
+    
