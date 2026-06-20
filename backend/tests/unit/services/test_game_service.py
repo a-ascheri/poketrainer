@@ -8,14 +8,9 @@ from src.models.game_save import GameSave, TrainerPartySlot
 from src.models.trainer_pokemon import TrainerPokemon
 from src.models.user import User
 from src.schemas.game_save import GameSaveUpdate
-from src.services.game_service import (
-    create_game_save,
-    get_game_save,
-    get_game_save_or_404,
-    remove_party_slot,
-    set_party_slot,
-    update_game_save,
-)
+from src.services.game_service import (create_game_save, get_game_save,
+                                       get_game_save_or_404, remove_party_slot,
+                                       set_party_slot, update_game_save)
 
 
 class TestGetGameSave:

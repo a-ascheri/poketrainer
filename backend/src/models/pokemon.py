@@ -16,6 +16,7 @@ class Pokemon(Base):
     base_stats = Column(JSON, nullable=False, default=dict)
     moves = Column(JSON, nullable=False, default=list)
     evolution_chain = Column(JSON, nullable=True)
+    official_artwork_url = Column(String(255), nullable=True)  # Nuevo campo
     raw_payload = Column(JSON, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())

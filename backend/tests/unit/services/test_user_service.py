@@ -6,24 +6,17 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from src.models.user import User
-from src.schemas.user import AdminCreate, ChangePasswordInput, UserCreate, UserUpdate
-from src.services.user_service import (
-    ADMIN_ROLE,
-    DEFAULT_ADMIN_PERMISSIONS,
-    TRAINER_ROLE,
-    _assert_unique_username_email,
-    authenticate_user,
-    change_password,
-    create_admin_user,
-    create_user,
-    ensure_initial_admin,
-    get_password_hash,
-    get_user_by_id,
-    list_users,
-    soft_delete_user,
-    update_user,
-    verify_password,
-)
+from src.schemas.user import (AdminCreate, ChangePasswordInput, UserCreate,
+                              UserUpdate)
+from src.services.user_service import (ADMIN_ROLE, DEFAULT_ADMIN_PERMISSIONS,
+                                       TRAINER_ROLE,
+                                       _assert_unique_username_email,
+                                       authenticate_user, change_password,
+                                       create_admin_user, create_user,
+                                       ensure_initial_admin, get_password_hash,
+                                       get_user_by_id, list_users,
+                                       soft_delete_user, update_user,
+                                       verify_password)
 
 
 class TestPasswordHashing:

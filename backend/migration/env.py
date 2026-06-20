@@ -6,7 +6,9 @@ from alembic import context
 from sqlalchemy import engine_from_config, pool
 
 from src.database.database import Base
-from src.models import pokemon, trainer, trainer_pokemon, user
+from src.models import *
+
+# from src.models import User, Pokemon, TrainerPokemon, GameSave, TrainerPartySlot
 
 config = context.config
 target_metadata = Base.metadata

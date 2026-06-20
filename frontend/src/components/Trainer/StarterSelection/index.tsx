@@ -41,7 +41,7 @@ const StarterSelection = () => {
         {options.map((starter) => (
           <article key={starter.id} className="starter-selection__card">
             <img
-              src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${starter.id}.png`}
+              src={starter.imageUrl}
               alt={starter.name}
             />
             <h3>{starter.name}</h3>

@@ -112,6 +112,14 @@ def _build_pokemon_model(payload: dict, evolution_chain: dict) -> dict:
     base_stats = {
         stat["stat"]["name"]: stat["base_stat"] for stat in payload.get("stats", [])
     }
+
+    official_artwork = (
+        payload.get("sprites", {})
+        .get("other", {})
+        .get("official-artwork", {})
+        .get("front_default")
+    )
+
     return {
         "pokeapi_id": payload["id"],
         "name": payload["name"],
@@ -125,6 +133,7 @@ def _build_pokemon_model(payload: dict, evolution_chain: dict) -> dict:
             "names": _extract_evolution_names(evolution_chain),
             "raw": evolution_chain,
         },
+        "official_artwork_url": official_artwork,
         "raw_payload": payload,
     }
 

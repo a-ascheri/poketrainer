@@ -5,6 +5,7 @@ export interface StarterOption {
   id: number;
   name: string;
   types: string[];
+  imageUrl: string;
 }
 
 export interface OwnedPokemon {
@@ -90,5 +91,12 @@ export const getPokemonMoves = async (
   trainerPokemonId: number,
 ): Promise<PokemonMoves> => {
   const response = await backendClient.get<PokemonMoves>(API_ROUTES.trainer.pokemonMoves(trainerPokemonId));
+  return response.data;
+};
+
+
+// Nueva función para obtener detalles de un Pokémon por ID
+export const getPokemonDetails = async (pokeapiId: number): Promise<{ official_artwork_url: string }> => {
+  const response = await backendClient.get(API_ROUTES.pokemon.search(pokeapiId.toString()));
   return response.data;
 };

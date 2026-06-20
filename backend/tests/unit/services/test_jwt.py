@@ -3,7 +3,7 @@ from unittest.mock import patch
 
 import jwt
 import pytest
-from jose import JWTError, ExpiredSignatureError
+from jose import ExpiredSignatureError, JWTError
 
 from src.config import settings
 from src.services.jwt import create_access_token, verify_access_token
@@ -84,7 +84,9 @@ class TestVerifyAccessToken:
         assert payload["sub"] == "user1"
         assert payload["role"] == "trainer"
 
-    @pytest.mark.skip(reason="Test de expiración requiere mock complejo, coverage ya es suficiente")
+    @pytest.mark.skip(
+        reason="Test de expiración requiere mock complejo, coverage ya es suficiente"
+    )
     def test_verify_expired_token(self):
         """Verificar token expirado - debe retornar None"""
         pass
@@ -117,16 +119,16 @@ class TestVerifyAccessToken:
     def test_verify_token_tampered(self):
         """Verificar token manipulado - versión robusta que funciona en todos los entornos"""
         token = create_access_token({"sub": "user1"})
-        
+
         # Método: Modificar la firma completamente
-        parts = token.split('.')
+        parts = token.split(".")
         if len(parts) == 3:
             # Cambiar la firma por algo inválido
             tampered_token = f"{parts[0]}.{parts[1]}.invalid_signature_123"
         else:
             # Fallback: modificar el último carácter
             tampered_token = token[:-1] + ("x" if token[-1] != "x" else "y")
-        
+
         payload = verify_access_token(tampered_token)
         assert payload is None
 
@@ -161,16 +163,16 @@ class TestVerifyAccessTokenEdgeCases:
     def test_verify_token_with_additional_headers(self):
         """Verificar token con headers adicionales"""
         token = create_access_token({"sub": "user1"})
-        
+
         # Añadir headers adicionales al token
         headers = {"kid": "test-key", "typ": "JWT"}
         token_with_headers = jwt.encode(
-            {"sub": "user1"}, 
-            settings.SECRET_KEY, 
+            {"sub": "user1"},
+            settings.SECRET_KEY,
             algorithm=settings.ALGORITHM,
-            headers=headers
+            headers=headers,
         )
-        
+
         payload = verify_access_token(token_with_headers)
         assert payload is not None
         assert payload["sub"] == "user1"
@@ -181,41 +183,43 @@ class TestVerifyAccessTokenEdgeCases:
         invalid_token = "header.payload"
         payload = verify_access_token(invalid_token)
         assert payload is None
-        
+
         # Token con 4 partes
         invalid_token = "header.payload.signature.extra"
         payload = verify_access_token(invalid_token)
         assert payload is None
 
-    @patch('src.services.jwt.jwt.decode')
+    @patch("src.services.jwt.jwt.decode")
     def test_verify_token_decode_exception(self, mock_decode):
         """Verificar manejo de excepciones durante decode"""
         # Mock para lanzar JWTError (que es lo que realmente se captura)
         mock_decode.side_effect = JWTError("Invalid token")
-        
+
         payload = verify_access_token("any.token.here")
         assert payload is None
 
-    @patch('src.services.jwt.jwt.decode')
+    @patch("src.services.jwt.jwt.decode")
     def test_verify_token_expired_exception(self, mock_decode):
         """Verificar manejo de token expirado"""
         mock_decode.side_effect = ExpiredSignatureError("Token expired")
-        
+
         payload = verify_access_token("expired.token.here")
         assert payload is None
 
-    @patch('src.services.jwt.jwt.decode')
+    @patch("src.services.jwt.jwt.decode")
     def test_verify_token_value_error(self, mock_decode):
         """Verificar manejo de ValueError"""
         mock_decode.side_effect = ValueError("Invalid token format")
-        
+
         payload = verify_access_token("invalid.token.here")
         assert payload is None
 
-    @patch('src.services.jwt.jwt.decode')
+    @patch("src.services.jwt.jwt.decode")
     def test_verify_token_attribute_error(self, mock_decode):
         """Verificar manejo de AttributeError"""
-        mock_decode.side_effect = AttributeError("'NoneType' object has no attribute 'rsplit'")
-        
+        mock_decode.side_effect = AttributeError(
+            "'NoneType' object has no attribute 'rsplit'"
+        )
+
         payload = verify_access_token("any.token.here")
         assert payload is None

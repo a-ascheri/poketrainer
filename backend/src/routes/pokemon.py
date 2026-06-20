@@ -31,25 +31,25 @@ async def search_pokemon(
         db (Session, optional): _description_. Defaults to Depends(get_db).
 
     Raises:
-        
+
         HTTPException: _description_ se lanza si la validación de Pydantic falla, si el Pokémon no se encuentra, o si hay errores de conexión con PokeAPI.
-        
+
         HTTPException: _description_ se lanza para errores de validación específicos, como formato inválido del nombre del Pokémon.
-        
+
         HTTPException: _description_ se lanza para errores de conexión o respuesta de PokeAPI, como 400 Bad Request o 404 Not Found.
-        
+
         HTTPException: _description_ se lanza para errores inesperados en el servidor, con un mensaje genérico para el cliente.
-        
+
         HTTPException: _description_ se lanza para errores de validación de Pydantic, con detalles específicos sobre los campos que fallaron.
-        
+
         HTTPException: _description_ se lanza para errores de conexión a PokeAPI, con un mensaje específico para el cliente sobre la imposibilidad de conectar.
-        
+
         HTTPException: _description_ se lanza para errores de tiempo de espera al conectar con PokeAPI.
-        
+
         HTTPException: _description_ se lanza para errores de respuesta de PokeAPI, con detalles específicos sobre el código de error recibido.
-        
+
         HTTPException: _description_ se lanza para errores inesperados en el servidor, con un mensaje genérico para el cliente.
-        
+
         HTTPException: _description_ se lanza para errores de validación de Pydantic, con detalles específicos sobre los campos que fallaron.
 
     Returns:

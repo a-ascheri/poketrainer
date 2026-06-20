@@ -4,13 +4,11 @@ import pytest
 from httpx import HTTPStatusError, Request, RequestError, Response
 
 from src.schemas.pokemon import PokemonMoveSchema
-from src.services.pokeapi_service import (
-    _build_pokemon_image_url,
-    _extract_evolution_names,
-    _extract_moves,
-    get_pokemon_data_from_pokeapi,
-    pokeapi_cache,
-)
+from src.services.pokeapi_service import (_build_pokemon_image_url,
+                                          _extract_evolution_names,
+                                          _extract_moves,
+                                          get_pokemon_data_from_pokeapi,
+                                          pokeapi_cache)
 
 
 class TestExtractEvolutionNames:
@@ -177,11 +175,8 @@ class TestGetPokemonDataFromPokeapi:
         pokeapi_cache.clear()
 
         # Primero llenar cache con un mock manual
-        from src.schemas.pokemon import (
-            PokemonDataResponseSchema,
-            PokemonStatSchema,
-            PokemonTypeSchema,
-        )
+        from src.schemas.pokemon import (PokemonDataResponseSchema,
+                                         PokemonStatSchema, PokemonTypeSchema)
 
         mock_pokemon = PokemonDataResponseSchema(
             id=25,

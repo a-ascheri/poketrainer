@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 
-from src.routes.prefixes import API_V1_PREFIX, GAME_TRAINER_PREFIX, SYSTEM_PREFIX
+from src.routes.prefixes import (API_V1_PREFIX, GAME_TRAINER_PREFIX,
+                                 SYSTEM_PREFIX)
 
 router = APIRouter(tags=["System"])
 
@@ -23,5 +24,5 @@ def health_check():
     return {
         "status": "healthy",
         "service": "poketrainer-api",
-        "version": "9.0.0",
+        "version": "11.0.0",
     }

@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta, timezone
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
 
 from jose import JWTError, jwt
 
@@ -9,11 +9,11 @@ from src.config import settings
 # Crear un access token JWT
 def create_access_token(data: dict, expires_delta: timedelta = None) -> str:
     """Crea un token JWT de acceso
-    
+
     Args:
         data: Datos a incluir en el token
         expires_delta: Tiempo de expiración personalizado (opcional)
-    
+
     Returns:
         Token JWT codificado
     """
@@ -31,17 +31,17 @@ def create_access_token(data: dict, expires_delta: timedelta = None) -> str:
 # Verificar y decodificar un access token JWT
 def verify_access_token(token: str) -> Optional[Dict[str, Any]]:
     """Verifica y decodifica un token JWT
-    
+
     Args:
         token: Token JWT a verificar
-    
+
     Returns:
         Payload del token si es válido, None en caso contrario
     """
     # Validar que el token no sea None, vacío o solo espacios
     if not token or not isinstance(token, str) or token.strip() == "":
         return None
-    
+
     try:
         payload = jwt.decode(
             token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]

@@ -3,8 +3,8 @@ import time
 
 from authlib.oauth2.rfc7636 import create_s256_code_challenge
 from fastapi import APIRouter, Depends, Form, HTTPException
-from sqlalchemy.orm import Session
 from pydantic import EmailStr
+from sqlalchemy.orm import Session
 
 from src.routes.auth_dependencies import get_current_user_entity
 from src.routes.prefixes import USER_PREFIX
@@ -13,7 +13,8 @@ from src.services.user_service import authenticate_user, change_password
 from src.services.user_service import create_user as create_user_service
 
 from ..database.database import get_db
-from ..schemas.user import ChangePasswordInput, LoginResponse, UserCreate, UserRead
+from ..schemas.user import (ChangePasswordInput, LoginResponse, UserCreate,
+                            UserRead)
 
 # Almacenamiento temporal de códigos de autorización (en memoria, solo para demo, redis para prouccion)
 authorization_codes = {}
@@ -199,4 +200,3 @@ def get_profile(current_user=Depends(get_current_user_entity)):
         UserRead: Perfil del usuario autenticado.
     """
     return current_user
-

@@ -8,27 +8,22 @@ from sqlalchemy.orm import Session
 from src.models.pokemon import Pokemon
 from src.models.trainer_pokemon import TrainerPokemon
 from src.models.user import User
-from src.services.pokemon_service import (
-    _build_pokemon_model,
-    _calculate_battle_stats,
-    _create_owned_pokemon,
-    _experience_to_level,
-    _extract_evolution_names,
-    _extract_moves,
-    _fetch_json,
-    _get_owned_pokemon_or_404,
-    _known_moves_for_level,
-    _load_evolution_chain,
-    _load_pokemon_payload,
-    acquire_pokemon,
-    gain_experience,
-    get_or_create_pokemon,
-    get_trainer_pokemon_moves,
-    get_trainer_pokemon_stats,
-    list_starters,
-    list_trainer_pokemon,
-    select_starter_pokemon,
-)
+from src.services.pokemon_service import (_build_pokemon_model,
+                                          _calculate_battle_stats,
+                                          _create_owned_pokemon,
+                                          _experience_to_level,
+                                          _extract_evolution_names,
+                                          _extract_moves, _fetch_json,
+                                          _get_owned_pokemon_or_404,
+                                          _known_moves_for_level,
+                                          _load_evolution_chain,
+                                          _load_pokemon_payload,
+                                          acquire_pokemon, gain_experience,
+                                          get_or_create_pokemon,
+                                          get_trainer_pokemon_moves,
+                                          get_trainer_pokemon_stats,
+                                          list_starters, list_trainer_pokemon,
+                                          select_starter_pokemon)
 
 
 class TestExperienceToLevel:

@@ -8,12 +8,9 @@ from fastapi import HTTPException
 # Agregar backend al path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
-from src.routes.auth_dependencies import (
-    get_current_user,
-    get_current_user_entity,
-    require_admin,
-    require_trainer,
-)
+from src.routes.auth_dependencies import (get_current_user,
+                                          get_current_user_entity,
+                                          require_admin, require_trainer)
 from src.services.jwt import create_access_token
 
 
