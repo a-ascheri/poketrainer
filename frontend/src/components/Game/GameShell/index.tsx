@@ -24,7 +24,7 @@ export default function GameShell() {
   const [allPokemon, setAllPokemon] = useState<OwnedPokemon[] | null>(null);
   const [keysDown,   setKeysDown]   = useState({ up: false, down: false, left: false, right: false });
 
-  const lastKnownPosRef = useRef({ tileX: 5, tileY: 7, mapKey: 'pallet_town' });
+  const lastKnownPosRef = useRef({ tileX: 5, tileY: 7, mapKey: 'pine_town' });
   const saveDataRef     = useRef<GameSave | null>(null);
   const statusRef       = useRef<GameStatus>('off');
   const overlayRef      = useRef<Overlay>('none');
@@ -44,7 +44,7 @@ export default function GameShell() {
     gameService.loadSave().then((s) => {
       setSaveData(s);
       saveDataRef.current = s;
-      lastKnownPosRef.current = { tileX: s.tile_x ?? 5, tileY: s.tile_y ?? 7, mapKey: s.map_id ?? 'pallet_town' };
+      lastKnownPosRef.current = { tileX: s.tile_x ?? 5, tileY: s.tile_y ?? 7, mapKey: s.map_id ?? 'pine_town' };
     }).catch(() => setSaveData(null));
   }, []);
 
@@ -91,7 +91,7 @@ export default function GameShell() {
       if (!save) save = await gameService.newGame();
       setSaveData(save);
       saveDataRef.current = save;
-      lastKnownPosRef.current = { tileX: save.tile_x ?? 5, tileY: save.tile_y ?? 7, mapKey: save.map_id ?? 'pallet_town' };
+      lastKnownPosRef.current = { tileX: save.tile_x ?? 5, tileY: save.tile_y ?? 7, mapKey: save.map_id ?? 'pine_town' };
       setStatus('running');
     } catch { setStatus('error'); }
   };
@@ -220,7 +220,7 @@ export default function GameShell() {
           <PhaserGame
             width={GAME_WIDTH}
             height={GAME_HEIGHT}
-            initMapKey={saveData?.map_id ?? 'pallet_town'}
+            initMapKey={saveData?.map_id ?? 'pine_town'}
             initTileX={saveData?.tile_x ?? 5}
             initTileY={saveData?.tile_y ?? 7}
             dpadState={dpadRef.current}

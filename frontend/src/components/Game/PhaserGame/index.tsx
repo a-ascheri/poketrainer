@@ -48,7 +48,7 @@ export default function PhaserGame({ width, height, initMapKey, initTileX, initT
       callbacks: {
         postBoot: (game) => {
           game.scene.add('WorldScene', WorldScene, true, {
-            mapKey: initMapKey ?? 'pallet_town',
+            mapKey: initMapKey ?? 'pine_town',
             tileX: initTileX ?? 5,
             tileY: initTileY ?? 7,
             onSave: (x: number, y: number, mk: string) => onSaveRef.current?.(x, y, mk),

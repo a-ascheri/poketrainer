@@ -4,7 +4,7 @@ from sqlalchemy.sql import func
 
 from src.database.database import Base
 
-DEFAULT_STARTING_MAP = "pallet_town"
+DEFAULT_STARTING_MAP = "pine_town"
 DEFAULT_TILE_X = 5
 DEFAULT_TILE_Y = 7
 DEFAULT_DIRECTION = "down"

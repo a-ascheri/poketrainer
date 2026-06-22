@@ -42,7 +42,7 @@ class TestLoadSave:
         mock_save = MagicMock()
         mock_save.id = 1
         mock_save.trainer_id = 1
-        mock_save.map_id = "pallet_town"
+        mock_save.map_id = "pine_town"
         mock_save.direction = "down"
         mock_save.inventory = {}
         mock_save.game_flags = {}
@@ -76,7 +76,7 @@ class TestNewGame:
         mock_save = MagicMock()
         mock_save.id = 1
         mock_save.trainer_id = 1
-        mock_save.map_id = "pallet_town"
+        mock_save.map_id = "pine_town"
         mock_save.direction = "down"
         mock_save.inventory = {}
         mock_save.game_flags = {}
@@ -160,7 +160,7 @@ class TestSetPartySlot:
         mock_save = MagicMock()
         mock_save.id = 1
         mock_save.trainer_id = 1
-        mock_save.map_id = "pallet_town"
+        mock_save.map_id = "pine_town"
         mock_save.direction = "down"
         mock_save.inventory = {}
         mock_save.game_flags = {}
@@ -214,7 +214,7 @@ class TestRemovePartySlot:
         mock_save = MagicMock()
         mock_save.id = 1
         mock_save.trainer_id = 1
-        mock_save.map_id = "pallet_town"
+        mock_save.map_id = "pine_town"
         mock_save.direction = "down"
         mock_save.inventory = {}
         mock_save.game_flags = {}

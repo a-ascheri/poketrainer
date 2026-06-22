@@ -61,11 +61,11 @@ export interface MapDef {
 }
 
 export const MAP_REGISTRY: Record<string, MapDef> = {
-  pallet_town: {
-    key: 'pallet_town',
-    label: 'Pallet Town',
-    jsonKey: 'map_pallet_town',
-    jsonUrl: '/maps/pallet_town.json',
+  pine_town: {
+    key: 'pine_town',
+    label: 'Pine Town',
+    jsonKey: 'map_pine_town',
+    jsonUrl: '/maps/pine_town.json',
     tilesetKey: 'pokemonlike',
     tilesetUrl: '/tilesets/pokemonlike.png',
     tilesetKey2: 'tilemap',        // ← AGREGAR ESTO
@@ -76,18 +76,18 @@ export const MAP_REGISTRY: Record<string, MapDef> = {
     objectLayer: 'objects',
     connections: {
       // Walk off the top edge → Route 1 (player X is preserved, spawns near bottom)
-      top: { targetMap: 'route_1', spawnX: 0, spawnY: 57 },
+      top: { targetMap: 'forest', spawnX: 0, spawnY: 57 },
     },
     signs: [
-      { tileX: 25, tileY: 19, text: '¡Bienvenido a Pallet Town!' },
+      { tileX: 25, tileY: 19, text: '¡Bienvenido a Pine Town!' },
     ],
   },
 
-  route_1: {
-    key: 'route_1',
-    label: 'Route 1',
-    jsonKey: 'map_route_1',
-    jsonUrl: '/maps/route_1.json',
+  forest: {
+    key: 'forest',
+    label: 'Forest',
+    jsonKey: 'map_forest',
+    jsonUrl: '/maps/forest.json',
     tilesetKey: 'pokemonlike',
     tilesetUrl: '/tilesets/pokemonlike.png',
     tilesetKey2: 'tilemap',        // ← AGREGAR ESTO
@@ -98,9 +98,39 @@ export const MAP_REGISTRY: Record<string, MapDef> = {
     objectLayer: 'objects',
     connections: {
       // Walk off the bottom edge → back to Pallet Town (player X is preserved)
-      bottom: { targetMap: 'pallet_town', spawnX: 0, spawnY: 2 },
+      bottom: { targetMap: 'pine_town', spawnX: 0, spawnY: 2 },
     },
+    // Los signs van definidos una posicion de un tile objeto, se sacan mediante metricas de posicion
+    signs: [  
+      { tileX: 8, tileY: 9, text: 'Wild Cave, el ingreso es bajo su propio riesgo' },
+      { tileX: 24, tileY: 6, text: 'MasterCave-Center:\n\nCentro de estudio de los fenómenos físicos, anómalos de origen desconocido y espeleológicos de las cavernas profundas.' },
+      { tileX: 33, tileY: 21, text: 'Residencia del Dr.Joe' },
+    ],
   },
+
+  cave: {
+    key: 'cave', 
+    label: 'Cueva',
+    jsonKey: 'map_cave',
+    jsonUrl: '/maps/cave.json',
+    tilesetKey: 'pokemonlike',
+    tilesetUrl: '/tilesets/pokemonlike.png',
+    tilesetKey2: 'tilemap',
+    tilesetUrl2: '/tilesets/tilemap.png',
+    widthInTiles: 20,
+    heightInTiles: 20,
+    groundLayer: 'ground',
+    objectLayer: 'objects',
+    connections: {
+      // La salida de la cueva irá a forest.json en la posición [7, 5]
+      // (justo debajo de donde entramos)
+      bottom: { targetMap: 'forest', spawnX: 7, spawnY: 5 },
+    },
+    signs: [
+      { tileX: 10, tileY: 10, text: 'Cueva oscura... ¡ten cuidado!' },
+    ],
+  },
+
 };
 
-export const DEFAULT_MAP = 'pallet_town';
+export const DEFAULT_MAP = 'pine_town';

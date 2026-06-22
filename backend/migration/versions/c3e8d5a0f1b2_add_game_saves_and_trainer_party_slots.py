@@ -34,7 +34,7 @@ def upgrade() -> None:
             "map_id",
             sa.String(length=100),
             nullable=False,
-            server_default="pallet_town",
+            server_default="pine_town",
         ),
         sa.Column("tile_x", sa.Integer(), nullable=False, server_default="5"),
         sa.Column("tile_y", sa.Integer(), nullable=False, server_default="7"),

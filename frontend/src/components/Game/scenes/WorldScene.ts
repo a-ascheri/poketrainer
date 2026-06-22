@@ -204,6 +204,19 @@ export class WorldScene extends Phaser.Scene {
     this.posText.setText(`${this.currentMapDef.label}  [${tileX}, ${tileY}]`);
 
     this._checkTransitions(tileX, tileY);
+
+    // ─── Entrada a cueva por posición específica ──────────────────────────
+    // Si estamos en forest y el jugador llega a [7, 4], entrar a la cueva
+    if (this.currentMapDef.key === 'forest') {
+      const tileX2 = Math.floor(this.player.x / TILE_SIZE);
+      const tileY2 = Math.floor(this.player.y / TILE_SIZE);
+      if (tileX2 === 7 && tileY2 === 4 && !this._transitioning) {
+        // Pequeño retraso para que no sea instantáneo
+        this.time.delayedCall(100, () => {
+          this._transitionTo('cave', 7, 18);
+        });
+      }
+    }
   }
 
   // ─── Map transitions ───────────────────────────────────────────────────────
@@ -283,22 +296,35 @@ export class WorldScene extends Phaser.Scene {
   }
 
   /**
-   * Checks the tile immediately in front of the player and fires onInteract
-   * if it matches a registered sign in the current map's registry entry.
+   * Checks if the player is adjacent to any sign and fires onInteract
+   * if they are standing next to one (in any direction).
    */
   private _tryInteract(): void {
     if (!this.player) return;
+    
     const tileX = Math.floor(this.player.x / TILE_SIZE);
     const tileY = Math.floor(this.player.y / TILE_SIZE);
-    const offsets = { down: [0, 1], up: [0, -1], left: [-1, 0], right: [1, 0] } as const;
-    const [dx, dy] = offsets[this.lastDirection];
-    const facingX = tileX + dx;
-    const facingY = tileY + dy;
-    const sign = this.currentMapDef.signs?.find(
-      (s) => s.tileX === facingX && s.tileY === facingY,
-    );
-    if (sign) {
-      this.onInteract?.(sign.text);
+    
+    // Verificar todas las direcciones alrededor del jugador
+    const directions = [
+      { dx: 0, dy: -1 }, // Arriba
+      { dx: 0, dy: 1 },  // Abajo
+      { dx: -1, dy: 0 }, // Izquierda
+      { dx: 1, dy: 0 },  // Derecha
+    ];
+    
+    for (const dir of directions) {
+      const checkX = tileX + dir.dx;
+      const checkY = tileY + dir.dy;
+      
+      const sign = this.currentMapDef.signs?.find(
+        (s) => s.tileX === checkX && s.tileY === checkY,
+      );
+      
+      if (sign) {
+        this.onInteract?.(sign.text);
+        return; // Encontramos un signo, salimos
+      }
     }
   }
 }
