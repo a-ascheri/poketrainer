@@ -16,96 +16,192 @@ const KEY_DIR: Record<string, 'up' | 'down' | 'left' | 'right'> = {
 };
 
 export default function GameShell() {
-  const [status,     setStatus]     = useState<GameStatus>('off');
-  const [saveData,   setSaveData]   = useState<GameSave | null>(null);
+  // ── Estados ──────────────────────────────────────────────────────────
+  const [status, setStatus] = useState<GameStatus>('off');
+  const [saveData, setSaveData] = useState<GameSave | null>(null);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
-  const [overlay,    setOverlay]    = useState<Overlay>('none');
+  const [overlay, setOverlay] = useState<Overlay>('none');
   const [dialogText, setDialogText] = useState<string | null>(null);
+  const [currentLineIndex, setCurrentLineIndex] = useState(0);
   const [allPokemon, setAllPokemon] = useState<OwnedPokemon[] | null>(null);
-  const [keysDown,   setKeysDown]   = useState({ up: false, down: false, left: false, right: false });
+  const [keysDown, setKeysDown] = useState({ up: false, down: false, left: false, right: false });
 
+  // ── Refs ─────────────────────────────────────────────────────────────
   const lastKnownPosRef = useRef({ tileX: 5, tileY: 7, mapKey: 'pine_town' });
-  const saveDataRef     = useRef<GameSave | null>(null);
-  const statusRef       = useRef<GameStatus>('off');
-  const overlayRef      = useRef<Overlay>('none');
-  const dialogRef       = useRef<string | null>(null);
-  const dpadRef         = useRef<DpadState>({
+  const saveDataRef = useRef<GameSave | null>(null);
+  const statusRef = useRef<GameStatus>('off');
+  const overlayRef = useRef<Overlay>('none');
+  const dialogRef = useRef<string | null>(null);
+  const dpadRef = useRef<DpadState>({
     up: false, down: false, left: false, right: false, interact: false, blocked: false,
   });
 
-  useEffect(() => { saveDataRef.current = saveData;   }, [saveData]);
-  useEffect(() => { statusRef.current   = status;     }, [status]);
-  useEffect(() => { overlayRef.current  = overlay;    }, [overlay]);
-  useEffect(() => { dialogRef.current   = dialogText; }, [dialogText]);
-  useEffect(() => { dpadRef.current.blocked = overlay !== 'none' || dialogText !== null; }, [overlay, dialogText]);
+  // ── Efectos ──────────────────────────────────────────────────────────
+  useEffect(() => { saveDataRef.current = saveData; }, [saveData]);
+  useEffect(() => { statusRef.current = status; }, [status]);
+  useEffect(() => { overlayRef.current = overlay; }, [overlay]);
+  
+  useEffect(() => {
+    dialogRef.current = dialogText;
+    if (dialogText !== null) {
+      setCurrentLineIndex(0);
+    }
+  }, [dialogText]);
+  
+  useEffect(() => {
+    dpadRef.current.blocked = overlay !== 'none' || dialogText !== null;
+  }, [overlay, dialogText]);
 
   // Load existing save on mount
   useEffect(() => {
-    gameService.loadSave().then((s) => {
-      setSaveData(s);
-      saveDataRef.current = s;
-      lastKnownPosRef.current = { tileX: s.tile_x ?? 5, tileY: s.tile_y ?? 7, mapKey: s.map_id ?? 'pine_town' };
-    }).catch(() => setSaveData(null));
+    gameService.loadSave()
+      .then((s) => {
+        setSaveData(s);
+        saveDataRef.current = s;
+        lastKnownPosRef.current = {
+          tileX: s.tile_x ?? 5,
+          tileY: s.tile_y ?? 7,
+          mapKey: s.map_id ?? 'pine_town'
+        };
+      })
+      .catch(() => setSaveData(null));
   }, []);
 
-  // Global keyboard listener — uses refs, registered once
-  useEffect(() => {
-    const handleInteract = () => {
-      if (dialogRef.current !== null) {
-        dialogRef.current = null;
+useEffect(() => {
+  const filterSpace = (e: KeyboardEvent) => {
+    if (e.code === 'Space' && dialogText !== null) {
+      e.stopPropagation();
+    }
+  };
+
+  document.addEventListener('keydown', filterSpace, true);
+  return () => {
+    document.removeEventListener('keydown', filterSpace, true);
+  };
+}, [dialogText]);
+
+  // ── Acción unificada de interacción ─────────────────────────────────
+  const handleInteractAction = () => {
+    // Si hay diálogo activo
+    if (dialogText !== null) {
+      const lines = dialogText.split('\n').filter(line => line.trim() !== '');
+      if (currentLineIndex < lines.length - 1) {
+        // Avanzar a la siguiente línea
+        setCurrentLineIndex(prev => prev + 1);
+        return;
+      } else {
+        // Cerrar el diálogo
         setDialogText(null);
+        setCurrentLineIndex(0);
+        dialogRef.current = null;
         dpadRef.current.interact = false;
         return;
       }
-      if (overlayRef.current !== 'none') return;
-      if (statusRef.current !== 'running') return;
-      dpadRef.current.interact = true;
-      setTimeout(() => { dpadRef.current.interact = false; }, 80);
-    };
+    }
 
+    // Si no hay diálogo, interactuar con el juego
+    if (overlay !== 'none') return;
+    if (status !== 'running') return;
+    dpadRef.current.interact = true;
+    setTimeout(() => { dpadRef.current.interact = false; }, 80);
+  };
+
+  // ── Teclado ──────────────────────────────────────────────────────────
+  useEffect(() => {
     const onDown = (e: KeyboardEvent) => {
       const dir = KEY_DIR[e.code];
-      if (dir) { dpadRef.current[dir] = true; setKeysDown((p) => p[dir] ? p : { ...p, [dir]: true }); return; }
-      if (e.code === 'Space' || e.code === 'KeyZ') { e.preventDefault(); handleInteract(); }
+      if (dir) {
+        dpadRef.current[dir] = true;
+        setKeysDown((p) => p[dir] ? p : { ...p, [dir]: true });
+        return;
+      }
+
+      // BARRA ESPACIADORA → SELECT
+      if (e.code === 'Space') {
+        e.preventDefault();
+        handleSelect();
+        return;
+      }
+
+      // ENTER → START / CONTINUAR
+      if (e.code === 'Enter') {
+        e.preventDefault();
+        handleStart();
+        return;
+      }
+
+      // SOLO la tecla Z activa la interacción (botón A)
+      if (e.code === 'KeyZ') {
+        e.preventDefault();
+        handleInteractAction();
+        return;
+      }
+
       if (e.code === 'Escape') setOverlay('none');
     };
+
     const onUp = (e: KeyboardEvent) => {
       const dir = KEY_DIR[e.code];
-      if (dir) { dpadRef.current[dir] = false; setKeysDown((p) => p[dir] ? { ...p, [dir]: false } : p); }
-      if (e.code === 'Space' || e.code === 'KeyZ') dpadRef.current.interact = false;
+      if (dir) {
+        dpadRef.current[dir] = false;
+        setKeysDown((p) => p[dir] ? { ...p, [dir]: false } : p);
+        return;
+      }
+      if (e.code === 'KeyZ') {
+        dpadRef.current.interact = false;
+      }
+      // Space y Enter no necesitan onUp porque son acciones de un solo click
     };
 
     window.addEventListener('keydown', onDown);
     window.addEventListener('keyup', onUp);
-    return () => { window.removeEventListener('keydown', onDown); window.removeEventListener('keyup', onUp); };
-  }, []);
+    return () => {
+      window.removeEventListener('keydown', onDown);
+      window.removeEventListener('keyup', onUp);
+    };
+  }, [dialogText, currentLineIndex]);
 
-  // ── Actions ────────────────────────────────────────────────────────────
-
+  // ── Actions ──────────────────────────────────────────────────────────
   const handleStart = async () => {
     if (status === 'loading') return;
-    if (status === 'running') { setOverlay((o) => o === 'menu' ? 'none' : 'menu'); return; }
+    if (status === 'running') {
+      setOverlay((o) => o === 'menu' ? 'none' : 'menu');
+      return;
+    }
     setStatus('loading');
     try {
       let save = saveDataRef.current;
       if (!save) save = await gameService.newGame();
       setSaveData(save);
       saveDataRef.current = save;
-      lastKnownPosRef.current = { tileX: save.tile_x ?? 5, tileY: save.tile_y ?? 7, mapKey: save.map_id ?? 'pine_town' };
+      lastKnownPosRef.current = {
+        tileX: save.tile_x ?? 5,
+        tileY: save.tile_y ?? 7,
+        mapKey: save.map_id ?? 'pine_town'
+      };
       setStatus('running');
-    } catch { setStatus('error'); }
+    } catch {
+      setStatus('error');
+    }
   };
 
   const openParty = async () => {
     if (!allPokemon) {
-      try { setAllPokemon(await listMyPokemon()); } catch { return; }
+      try {
+        setAllPokemon(await listMyPokemon());
+      } catch {
+        return;
+      }
     }
     setOverlay('party');
   };
 
   const handleSelect = async () => {
     if (status !== 'running') return;
-    if (overlay === 'party') { setOverlay('none'); return; }
+    if (overlay === 'party') {
+      setOverlay('none');
+      return;
+    }
     await openParty();
   };
 
@@ -130,7 +226,11 @@ export default function GameShell() {
   const handleShutdown = async () => {
     if (saveDataRef.current) {
       const { tileX, tileY, mapKey } = lastKnownPosRef.current;
-      try { await gameService.saveGame({ map_id: mapKey, tile_x: tileX, tile_y: tileY }); } catch { /* ok */ }
+      try {
+        await gameService.saveGame({ map_id: mapKey, tile_x: tileX, tile_y: tileY });
+      } catch {
+        /* ok */
+      }
     }
     setStatus('off');
     setOverlay('none');
@@ -145,29 +245,41 @@ export default function GameShell() {
       const updated = await gameService.saveGame({ map_id: mapKey, tile_x: tileX, tile_y: tileY });
       saveDataRef.current = updated;
       setSaveData(updated);
-    } catch { /* silent */ }
+    } catch {
+      /* silent */
+    }
   };
 
-  // ── Input helpers ──────────────────────────────────────────────────────
+  // ── Input helpers ────────────────────────────────────────────────────
+  const pressDpad = (dir: 'up' | 'down' | 'left' | 'right') => {
+    dpadRef.current[dir] = true;
+    setKeysDown((p) => ({ ...p, [dir]: true }));
+  };
 
-  const pressDpad  = (dir: 'up' | 'down' | 'left' | 'right') => { dpadRef.current[dir] = true;  setKeysDown((p) => ({ ...p, [dir]: true  })); };
-  const releaseDpad = (dir: 'up' | 'down' | 'left' | 'right') => { dpadRef.current[dir] = false; setKeysDown((p) => ({ ...p, [dir]: false })); };
+  const releaseDpad = (dir: 'up' | 'down' | 'left' | 'right') => {
+    dpadRef.current[dir] = false;
+    setKeysDown((p) => ({ ...p, [dir]: false }));
+  };
 
   const handleAPress = () => {
-    if (dialogText !== null) { setDialogText(null); dialogRef.current = null; dpadRef.current.interact = false; return; }
-    if (overlay !== 'none') return;
-    if (status !== 'running') return;
-    dpadRef.current.interact = true;
+    handleInteractAction();
   };
-  const handleARelease = () => { dpadRef.current.interact = false; };
+
+  const handleARelease = () => {
+    dpadRef.current.interact = false;
+  };
 
   const handleBPress = () => {
-    if (dialogText !== null) { setDialogText(null); dialogRef.current = null; return; }
+    if (dialogText !== null) {
+      setDialogText(null);
+      setCurrentLineIndex(0);
+      dialogRef.current = null;
+      return;
+    }
     if (overlay !== 'none') setOverlay('none');
   };
 
-  // ── Party data ─────────────────────────────────────────────────────────
-
+  // ── Party data ──────────────────────────────────────────────────────
   const partySlots = Array.from({ length: 6 }).map((_, i) => {
     const slot = saveData?.party_slots?.find((s) => s.slot_position === i);
     if (!slot) return null;
@@ -176,9 +288,10 @@ export default function GameShell() {
 
   const startLabel = status === 'off' ? (saveData ? 'CONTINUE' : 'START') : 'START';
 
+  // ── Render ──────────────────────────────────────────────────────────
   return (
     <div className="gbc">
-      {/* ── Header ─────────────────────────────────────────────────── */}
+      {/* Header */}
       <div className="gbc__header">
         <div className="gbc__power-indicator">
           <span className={`gbc__power-led${status === 'running' ? ' gbc__power-led--on' : ''}`} />
@@ -190,7 +303,7 @@ export default function GameShell() {
         </span>
       </div>
 
-      {/* ── Screen bezel ────────────────────────────────────────────── */}
+      {/* Screen bezel */}
       <div className="gbc__bezel">
         {status === 'off' && (
           <div className="gbc__screen-off">
@@ -205,7 +318,9 @@ export default function GameShell() {
 
         {status === 'loading' && (
           <div className="gbc__screen-off">
-            <div className="gbc__loading-bar-wrap"><div className="gbc__loading-bar" /></div>
+            <div className="gbc__loading-bar-wrap">
+              <div className="gbc__loading-bar" />
+            </div>
           </div>
         )}
 
@@ -230,12 +345,16 @@ export default function GameShell() {
         )}
 
         {/* Dialog overlay */}
-        {dialogText && (
-          <div className="gbc__dialog">
-            <p className="gbc__dialog-text">{dialogText}</p>
-            <span className="gbc__dialog-hint">▼</span>
-          </div>
-        )}
+        {dialogText && (() => {
+          const lines = dialogText.split('\n').filter(line => line.trim() !== '');
+          const currentLine = lines[currentLineIndex] || '';
+          return (
+            <div className="gbc__dialog">
+              <div className="gbc__dialog-text">{currentLine}</div>
+              <span className="gbc__dialog-hint">▼</span>
+            </div>
+          );
+        })()}
 
         {/* Party overlay */}
         {overlay === 'party' && (
@@ -296,31 +415,38 @@ export default function GameShell() {
         )}
       </div>
 
-      {/* ── Controls ────────────────────────────────────────────────── */}
+      {/* Controls */}
       <div className="gbc__controls" onContextMenu={(e) => e.preventDefault()}>
-
         {/* D-pad */}
         <div className="gbc__dpad">
           <div className="gbc__dpad-cross" />
           <button
             className={`dpad-btn dpad-btn--up${keysDown.up ? ' dpad-btn--active' : ''}`}
-            onPointerDown={() => pressDpad('up')} onPointerUp={() => releaseDpad('up')} onPointerLeave={() => releaseDpad('up')}
+            onPointerDown={() => pressDpad('up')}
+            onPointerUp={() => releaseDpad('up')}
+            onPointerLeave={() => releaseDpad('up')}
             aria-label="Up"
           >▲</button>
           <button
             className={`dpad-btn dpad-btn--left${keysDown.left ? ' dpad-btn--active' : ''}`}
-            onPointerDown={() => pressDpad('left')} onPointerUp={() => releaseDpad('left')} onPointerLeave={() => releaseDpad('left')}
+            onPointerDown={() => pressDpad('left')}
+            onPointerUp={() => releaseDpad('left')}
+            onPointerLeave={() => releaseDpad('left')}
             aria-label="Left"
           >◀</button>
           <div className="dpad-btn dpad-btn--mid" />
           <button
             className={`dpad-btn dpad-btn--right${keysDown.right ? ' dpad-btn--active' : ''}`}
-            onPointerDown={() => pressDpad('right')} onPointerUp={() => releaseDpad('right')} onPointerLeave={() => releaseDpad('right')}
+            onPointerDown={() => pressDpad('right')}
+            onPointerUp={() => releaseDpad('right')}
+            onPointerLeave={() => releaseDpad('right')}
             aria-label="Right"
           >▶</button>
           <button
             className={`dpad-btn dpad-btn--down${keysDown.down ? ' dpad-btn--active' : ''}`}
-            onPointerDown={() => pressDpad('down')} onPointerUp={() => releaseDpad('down')} onPointerLeave={() => releaseDpad('down')}
+            onPointerDown={() => pressDpad('down')}
+            onPointerUp={() => releaseDpad('down')}
+            onPointerLeave={() => releaseDpad('down')}
             aria-label="Down"
           >▼</button>
         </div>
@@ -333,11 +459,13 @@ export default function GameShell() {
           </button>
         </div>
 
-        {/* Speaker dots (decorative) */}
+        {/* Speaker dots */}
         <div className="gbc__speaker">
           {Array.from({ length: 4 }).map((_, r) => (
             <div key={r} className="gbc__speaker-row">
-              {Array.from({ length: 4 }).map((_, c) => <span key={c} className="gbc__speaker-dot" />)}
+              {Array.from({ length: 4 }).map((_, c) => (
+                <span key={c} className="gbc__speaker-dot" />
+              ))}
             </div>
           ))}
         </div>
@@ -355,7 +483,7 @@ export default function GameShell() {
         </div>
       </div>
 
-      {/* ── Footer ──────────────────────────────────────────────────── */}
+      {/* Footer */}
       <div className="gbc__footer">
         <span className="gbc__footer-text">Game Boy Color ™</span>
       </div>
