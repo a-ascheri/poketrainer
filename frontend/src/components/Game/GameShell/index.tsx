@@ -124,23 +124,24 @@ export default function GameShell() {
   }, [status]);
 
   // ── Acción unificada de interacción ─────────────────────────────────
+  // IMPORTANTE: usa refs en lugar de estado para evitar closures stale en el
+  // handler de teclado (el useEffect se registra una sola vez y no ve
+  // actualizaciones de estado posteriores).
   const handleInteractAction = () => {
-    if (dialogText !== null) {
-      const lines = dialogText.split('\n').filter(line => line.trim() !== '');
-      if (currentLineIndex < lines.length - 1) {
-        setCurrentLineIndex(prev => prev + 1);
-        return;
-      } else {
+    if (dialogRef.current !== null) {
+      const lines = dialogRef.current.split('\n').filter(line => line.trim() !== '');
+      setCurrentLineIndex(prev => {
+        if (prev < lines.length - 1) return prev + 1;
         setDialogText(null);
-        setCurrentLineIndex(0);
         dialogRef.current = null;
         dpadRef.current.interact = false;
-        return;
-      }
+        return 0;
+      });
+      return;
     }
 
-    if (overlay !== 'none') return;
-    if (status !== 'running') return;
+    if (overlayRef.current !== 'none') return;
+    if (statusRef.current !== 'running') return;
     dpadRef.current.interact = true;
     setTimeout(() => { dpadRef.current.interact = false; }, 80);
   };
@@ -156,26 +157,24 @@ export default function GameShell() {
         return;
       }
 
-      // Space, Z y Enter: React SOLO los maneja cuando hay un overlay/dialog abierto.
-      // Si el juego está corriendo sin overlay, NO hacemos preventDefault ni stopPropagation
-      // para que Phaser los reciba intactos a través de su propio listener de canvas.
-      const isBlocked = overlayRef.current !== 'none' || dialogRef.current !== null;
-
-      if (e.code === 'Space' || e.code === 'KeyZ') {
-        if (isBlocked) {
-          e.preventDefault();
-          handleInteractAction();
-        }
-        // Si NO está bloqueado, dejamos pasar → Phaser lo captura
+      // Space → SELECT (party / avanzar diálogo)
+      if (e.code === 'Space') {
+        e.preventDefault();
+        handleSelect();
         return;
       }
 
+      // Z → interacción con el mundo (signos, NPCs) via dpadRef
+      if (e.code === 'KeyZ') {
+        e.preventDefault();
+        handleInteractAction();
+        return;
+      }
+
+      // Enter → START (arrancar / pausar-reanudar)
       if (e.code === 'Enter') {
-        if (isBlocked) {
-          e.preventDefault();
-          handleStart();
-        }
-        // Si NO está bloqueado, dejamos pasar → Phaser lo captura
+        e.preventDefault();
+        handleStart();
         return;
       }
 
@@ -197,18 +196,18 @@ export default function GameShell() {
       }
     };
 
-    // Usamos el objeto window con capture: true para interceptar antes que nadie
+    // [] → se registra una sola vez; todas las lecturas de estado usan refs.
     window.addEventListener('keydown', onDown, true);
     window.addEventListener('keyup', onUp, true);
     return () => {
       window.removeEventListener('keydown', onDown, true);
       window.removeEventListener('keyup', onUp, true);
     };
-  }, [dialogText, currentLineIndex]);
+  }, []);
   // ── Actions ──────────────────────────────────────────────────────────
   const handleStart = async () => {
-    if (status === 'loading') return;
-    if (status === 'running') {
+    if (statusRef.current === 'loading') return;
+    if (statusRef.current === 'running') {
       setOverlay((o) => o === 'menu' ? 'none' : 'menu');
       return;
     }
@@ -241,8 +240,8 @@ export default function GameShell() {
   };
 
   const handleSelect = async () => {
-    if (status !== 'running') return;
-    if (overlay === 'party') {
+    if (statusRef.current !== 'running') return;
+    if (overlayRef.current === 'party') {
       setOverlay('none');
       return;
     }

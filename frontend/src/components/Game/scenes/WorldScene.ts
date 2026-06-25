@@ -132,12 +132,8 @@ export class WorldScene extends Phaser.Scene {
   this.cameras.main.fadeIn(300, 0, 0, 0);
   
   this.cursors = this.input.keyboard!.createCursorKeys();
-  // enableCapture=true hace que Phaser llame preventDefault() sobre estas teclas
-  // cuando el canvas tiene foco, evitando que el browser las intercepte (scroll, submit).
-  this.interactKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE, false, true);
-  this.zKey        = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.Z,     false, true);
-  this.enterKey    = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER, false, true);
-
+  // Space / Z / Enter son manejados exclusivamente por React (index_gameshell).
+  // Phaser solo necesita las arrow keys via cursors + el dpadRef para interact/menu.
   this._createAnimations();
   
   this.posText = this.add
@@ -174,17 +170,9 @@ export class WorldScene extends Phaser.Scene {
       return;
     }
 
-    // Interact (A button, Z key, or Space key)
-    const keyInteract = Phaser.Input.Keyboard.JustDown(this.interactKey) ||
-                        Phaser.Input.Keyboard.JustDown(this.zKey);
-
-    if (keyInteract || dpadInteractJust) {
+    // Interact: solo via dpadRef (React maneja Z/Space y los convierte a dpad.interact)
+    if (dpadInteractJust) {
       this._tryInteract();
-    }
-
-    // Check for Menu (Enter key)
-    if (Phaser.Input.Keyboard.JustDown(this.enterKey)) {
-        this.onOpenMenu?.();
     }
 
     const { left, right, up, down } = this.cursors;
