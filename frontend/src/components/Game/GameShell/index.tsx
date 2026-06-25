@@ -32,15 +32,39 @@ export default function GameShell() {
   const statusRef = useRef<GameStatus>('off');
   const overlayRef = useRef<Overlay>('none');
   const dialogRef = useRef<string | null>(null);
+  const gameContainerRef = useRef<HTMLDivElement>(null);
   const dpadRef = useRef<DpadState>({
     up: false, down: false, left: false, right: false, interact: false, blocked: false,
   });
 
+  // ── Función para forzar el foco y evitar pérdida de foco ────────────
+  const forceFocus = (e?: React.SyntheticEvent) => {
+    if (e) e.preventDefault();
+        if (gameContainerRef.current) {
+          gameContainerRef.current.focus();
+        }
+      };
+      
   // ── Efectos ──────────────────────────────────────────────────────────
+
+  useEffect(() => {
+  const takeFocus = (e: FocusEvent) => {
+    // Si el elemento que recibe el foco no es el juego, lo "robamos"
+    if (gameContainerRef.current && e.target !== gameContainerRef.current) {
+        // Solo robamos foco si no es un campo de input
+        if (!(e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement)) {
+            gameContainerRef.current.focus();
+        }
+    }
+  };
+
+  document.addEventListener('focusin', takeFocus, true);
+  return () => document.removeEventListener('focusin', takeFocus, true);
+}, []);
+
   useEffect(() => { saveDataRef.current = saveData; }, [saveData]);
   useEffect(() => { statusRef.current = status; }, [status]);
   useEffect(() => { overlayRef.current = overlay; }, [overlay]);
-  
   useEffect(() => {
     dialogRef.current = dialogText;
     if (dialogText !== null) {
@@ -67,30 +91,46 @@ export default function GameShell() {
       .catch(() => setSaveData(null));
   }, []);
 
-useEffect(() => {
-  const filterSpace = (e: KeyboardEvent) => {
-    if (e.code === 'Space' && dialogText !== null) {
-      e.stopPropagation();
-    }
-  };
+  // ... existing code ...
+  useEffect(() => {
+    const handleGlobalClick = () => forceFocus();
+    document.addEventListener('click', handleGlobalClick);
+    return () => document.removeEventListener('click', handleGlobalClick);
+  }, []);
+  // ... existing code ...
 
-  document.addEventListener('keydown', filterSpace, true);
-  return () => {
-    document.removeEventListener('keydown', filterSpace, true);
-  };
-}, [dialogText]);
+  // ── FILTRO: La barra espaciadora NO afecta al diálogo ──────────────
+  useEffect(() => {
+    const filterSpace = (e: KeyboardEvent) => {
+      if (e.code === 'Space' && dialogText !== null) {
+        e.stopPropagation();
+      }
+    };
+
+    document.addEventListener('keydown', filterSpace, true);
+    return () => {
+      document.removeEventListener('keydown', filterSpace, true);
+    };
+  }, [dialogText]);
+  // ── ENFOQUE DEFINITIVO ──────────────────────────────────────────────
+  useEffect(() => {
+    if (status === 'running') {
+      forceFocus();
+      setTimeout(forceFocus, 100);
+      setTimeout(forceFocus, 300);
+      setTimeout(forceFocus, 500);
+      setTimeout(forceFocus, 800);
+    }
+  }, [status]);
 
   // ── Acción unificada de interacción ─────────────────────────────────
   const handleInteractAction = () => {
-    // Si hay diálogo activo
     if (dialogText !== null) {
       const lines = dialogText.split('\n').filter(line => line.trim() !== '');
       if (currentLineIndex < lines.length - 1) {
-        // Avanzar a la siguiente línea
         setCurrentLineIndex(prev => prev + 1);
         return;
       } else {
-        // Cerrar el diálogo
         setDialogText(null);
         setCurrentLineIndex(0);
         dialogRef.current = null;
@@ -99,7 +139,6 @@ useEffect(() => {
       }
     }
 
-    // Si no hay diálogo, interactuar con el juego
     if (overlay !== 'none') return;
     if (status !== 'running') return;
     dpadRef.current.interact = true;
@@ -111,33 +150,39 @@ useEffect(() => {
     const onDown = (e: KeyboardEvent) => {
       const dir = KEY_DIR[e.code];
       if (dir) {
+        e.preventDefault();
         dpadRef.current[dir] = true;
         setKeysDown((p) => p[dir] ? p : { ...p, [dir]: true });
         return;
       }
 
-      // BARRA ESPACIADORA → SELECT
-      if (e.code === 'Space') {
-        e.preventDefault();
-        handleSelect();
+      // Space, Z y Enter: React SOLO los maneja cuando hay un overlay/dialog abierto.
+      // Si el juego está corriendo sin overlay, NO hacemos preventDefault ni stopPropagation
+      // para que Phaser los reciba intactos a través de su propio listener de canvas.
+      const isBlocked = overlayRef.current !== 'none' || dialogRef.current !== null;
+
+      if (e.code === 'Space' || e.code === 'KeyZ') {
+        if (isBlocked) {
+          e.preventDefault();
+          handleInteractAction();
+        }
+        // Si NO está bloqueado, dejamos pasar → Phaser lo captura
         return;
       }
 
-      // ENTER → START / CONTINUAR
       if (e.code === 'Enter') {
-        e.preventDefault();
-        handleStart();
+        if (isBlocked) {
+          e.preventDefault();
+          handleStart();
+        }
+        // Si NO está bloqueado, dejamos pasar → Phaser lo captura
         return;
       }
 
-      // SOLO la tecla Z activa la interacción (botón A)
-      if (e.code === 'KeyZ') {
+      if (e.code === 'Escape') {
         e.preventDefault();
-        handleInteractAction();
-        return;
+        setOverlay('none');
       }
-
-      if (e.code === 'Escape') setOverlay('none');
     };
 
     const onUp = (e: KeyboardEvent) => {
@@ -150,17 +195,16 @@ useEffect(() => {
       if (e.code === 'KeyZ') {
         dpadRef.current.interact = false;
       }
-      // Space y Enter no necesitan onUp porque son acciones de un solo click
     };
 
-    window.addEventListener('keydown', onDown);
-    window.addEventListener('keyup', onUp);
+    // Usamos el objeto window con capture: true para interceptar antes que nadie
+    window.addEventListener('keydown', onDown, true);
+    window.addEventListener('keyup', onUp, true);
     return () => {
-      window.removeEventListener('keydown', onDown);
-      window.removeEventListener('keyup', onUp);
+      window.removeEventListener('keydown', onDown, true);
+      window.removeEventListener('keyup', onUp, true);
     };
   }, [dialogText, currentLineIndex]);
-
   // ── Actions ──────────────────────────────────────────────────────────
   const handleStart = async () => {
     if (status === 'loading') return;
@@ -312,8 +356,8 @@ useEffect(() => {
               <span className="gbc__screen-subtitle">
                 {saveData.map_id.replace(/_/g, ' ')} · {Math.floor((saveData.play_time_seconds ?? 0) / 60)}m
               </span>
-            )}
-          </div>
+                  )}
+                </div>
         )}
 
         {status === 'loading' && (
@@ -332,16 +376,28 @@ useEffect(() => {
         )}
 
         {status === 'running' && (
-          <PhaserGame
-            width={GAME_WIDTH}
-            height={GAME_HEIGHT}
-            initMapKey={saveData?.map_id ?? 'pine_town'}
-            initTileX={saveData?.tile_x ?? 5}
-            initTileY={saveData?.tile_y ?? 7}
-            dpadState={dpadRef.current}
-            onSave={handleAutosave}
-            onInteract={(msg) => setDialogText(msg)}
-          />
+          <div
+            ref={gameContainerRef}
+            className="gbc__game-wrapper"
+            tabIndex={0}
+            style={{ 
+              outline: 'none',
+              width: GAME_WIDTH,
+              height: GAME_HEIGHT,
+              flexShrink: 0,
+            }}
+          >
+            <PhaserGame
+              width={GAME_WIDTH}
+              height={GAME_HEIGHT}
+              initMapKey={saveData?.map_id ?? 'pine_town'}
+              initTileX={saveData?.tile_x ?? 5}
+              initTileY={saveData?.tile_y ?? 7}
+              dpadState={dpadRef.current}
+              onSave={handleAutosave}
+              onInteract={(msg) => setDialogText(msg)}
+            />
+          </div>
         )}
 
         {/* Dialog overlay */}
@@ -352,8 +408,8 @@ useEffect(() => {
             <div className="gbc__dialog">
               <div className="gbc__dialog-text">{currentLine}</div>
               <span className="gbc__dialog-hint">▼</span>
-            </div>
-          );
+        </div>
+  );
         })()}
 
         {/* Party overlay */}
@@ -422,14 +478,14 @@ useEffect(() => {
           <div className="gbc__dpad-cross" />
           <button
             className={`dpad-btn dpad-btn--up${keysDown.up ? ' dpad-btn--active' : ''}`}
-            onPointerDown={() => pressDpad('up')}
+            onPointerDown={(e) => { e.preventDefault(); forceFocus(); pressDpad('up'); }}
             onPointerUp={() => releaseDpad('up')}
             onPointerLeave={() => releaseDpad('up')}
             aria-label="Up"
           >▲</button>
           <button
             className={`dpad-btn dpad-btn--left${keysDown.left ? ' dpad-btn--active' : ''}`}
-            onPointerDown={() => pressDpad('left')}
+            onPointerDown={(e) => { e.preventDefault(); forceFocus(); pressDpad('left'); }}
             onPointerUp={() => releaseDpad('left')}
             onPointerLeave={() => releaseDpad('left')}
             aria-label="Left"
@@ -437,14 +493,14 @@ useEffect(() => {
           <div className="dpad-btn dpad-btn--mid" />
           <button
             className={`dpad-btn dpad-btn--right${keysDown.right ? ' dpad-btn--active' : ''}`}
-            onPointerDown={() => pressDpad('right')}
+            onPointerDown={(e) => { e.preventDefault(); forceFocus(); pressDpad('right'); }}
             onPointerUp={() => releaseDpad('right')}
             onPointerLeave={() => releaseDpad('right')}
             aria-label="Right"
           >▶</button>
           <button
             className={`dpad-btn dpad-btn--down${keysDown.down ? ' dpad-btn--active' : ''}`}
-            onPointerDown={() => pressDpad('down')}
+            onPointerDown={(e) => { e.preventDefault(); forceFocus(); pressDpad('down'); }}
             onPointerUp={() => releaseDpad('down')}
             onPointerLeave={() => releaseDpad('down')}
             aria-label="Down"
@@ -453,8 +509,20 @@ useEffect(() => {
 
         {/* SELECT + START */}
         <div className="gbc__mid-buttons">
-          <button className="gbc__sys-btn" onClick={handleSelect} disabled={status !== 'running'}>SELECT</button>
-          <button className="gbc__sys-btn gbc__sys-btn--start" onClick={handleStart} disabled={status === 'loading'}>
+          <button
+            type="button"
+            className="gbc__sys-btn"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={(e) => { forceFocus(e); handleSelect(); }}
+            disabled={status !== 'running'}
+          >SELECT</button>
+          <button
+            type="button"
+            className="gbc__sys-btn gbc__sys-btn--start"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={(e) => { forceFocus(e); handleStart(); }}
+            disabled={status === 'loading'}
+          >
             {startLabel}
           </button>
         </div>
@@ -472,12 +540,20 @@ useEffect(() => {
 
         {/* A / B buttons */}
         <div className="gbc__ab-group">
-          <button className="gbc__ab-btn gbc__b-btn" onPointerDown={handleBPress} aria-label="B">B</button>
           <button
+            type="button"
+            className="gbc__ab-btn gbc__b-btn"
+            onMouseDown={(e) => e.preventDefault()}
+            onPointerDown={(e) => { forceFocus(e); handleBPress(); }}
+            aria-label="B"
+          >B</button>
+          <button
+            type="button"
             className="gbc__ab-btn gbc__a-btn"
-            onPointerDown={handleAPress}
-            onPointerUp={handleARelease}
-            onPointerLeave={handleARelease}
+            onMouseDown={(e) => e.preventDefault()}
+            onPointerDown={(e) => { forceFocus(e); handleAPress(); }}
+            onPointerUp={() => handleARelease()}
+            onPointerLeave={() => handleARelease()}
             aria-label="A"
           >A</button>
         </div>

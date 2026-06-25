@@ -44,6 +44,11 @@ export default function PhaserGame({ width, height, initMapKey, initTileX, initT
         default: 'arcade',
         arcade: { debug: false },
       },
+      input: {
+        keyboard: {
+          capture: []
+        }
+      },
       banner: false,
       callbacks: {
         postBoot: (game) => {
@@ -53,6 +58,11 @@ export default function PhaserGame({ width, height, initMapKey, initTileX, initT
             tileY: initTileY ?? 7,
             onSave: (x: number, y: number, mk: string) => onSaveRef.current?.(x, y, mk),
             onInteract: (msg: string) => onInteractRef.current?.(msg),
+            onOpenMenu: () => {
+              // Simular el comportamiento de presionar Enter que teniamos en GameShell
+              const event = new KeyboardEvent('keydown', { code: 'Enter', bubbles: true });
+                   window.dispatchEvent(event);
+            },
             dpad: dpadState,
           });
         },
@@ -66,5 +76,23 @@ export default function PhaserGame({ width, height, initMapKey, initTileX, initT
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [width, height]);
 
+  // Apenas el canvas de Phaser esté en el DOM, le damos foco para que
+  // reciba Space/Z/Enter sin necesitar un click previo del usuario.
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const observer = new MutationObserver(() => {
+      const canvas = containerRef.current?.querySelector('canvas');
+      if (canvas) {
+        canvas.setAttribute('tabindex', '0');
+        canvas.focus({ preventScroll: true });
+        observer.disconnect();
+      }
+    });
+    observer.observe(containerRef.current, { childList: true, subtree: true });
+    return () => observer.disconnect();
+  }, []);
+
   return <div ref={containerRef} style={{ lineHeight: 0 }} />;
 }
+
+

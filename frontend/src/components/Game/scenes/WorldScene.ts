@@ -22,6 +22,7 @@ interface InitData {
   tileY?: number;
   onSave?: (tileX: number, tileY: number, mapKey: string) => void;
   onInteract?: (message: string) => void;
+  onOpenMenu?: () => void; // NUEVO
   dpad?: DpadState;
 }
 
@@ -29,10 +30,13 @@ export class WorldScene extends Phaser.Scene {
   private player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private interactKey!: Phaser.Input.Keyboard.Key;
+  private zKey!: Phaser.Input.Keyboard.Key;
+  private enterKey!: Phaser.Input.Keyboard.Key;
   private posText!: Phaser.GameObjects.Text;
   private objectLayer!: Phaser.Tilemaps.TilemapLayer | Phaser.Tilemaps.TilemapGPULayer;
   private onSave?: (tileX: number, tileY: number, mapKey: string) => void;
   private onInteract?: (message: string) => void;
+  private onOpenMenu?: () => void; // NUEVO
   private lastDirection: 'down' | 'up' | 'left' | 'right' = 'down';
   private _initTileX = 5;
   private _initTileY = 7;
@@ -54,6 +58,7 @@ export class WorldScene extends Phaser.Scene {
     this._initTileY = data.tileY ?? 7;
     this.onSave = data.onSave;
     this.onInteract = data.onInteract;
+    this.onOpenMenu = data.onOpenMenu; // NUEVO
     this._transitioning = false;
     this._prevInteract = false;
     if (data.dpad) this.dpad = data.dpad;
@@ -82,7 +87,7 @@ export class WorldScene extends Phaser.Scene {
   create(): void {
   const def = this.currentMapDef;
   const map = this.make.tilemap({ key: def.jsonKey });
-  
+
   // Cargar el primer tileset
   const tileset1 = map.addTilesetImage(def.tilesetKey, def.tilesetKey);
   
@@ -111,6 +116,8 @@ export class WorldScene extends Phaser.Scene {
   
   this.mapWidthPx = map.widthInPixels;
   this.mapHeightPx = map.heightInPixels;
+
+  
   
   const startX = this._initTileX * TILE_SIZE + TILE_SIZE / 2;
   const startY = this._initTileY * TILE_SIZE + TILE_SIZE / 2;
@@ -125,7 +132,12 @@ export class WorldScene extends Phaser.Scene {
   this.cameras.main.fadeIn(300, 0, 0, 0);
   
   this.cursors = this.input.keyboard!.createCursorKeys();
-  this.interactKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+  // enableCapture=true hace que Phaser llame preventDefault() sobre estas teclas
+  // cuando el canvas tiene foco, evitando que el browser las intercepte (scroll, submit).
+  this.interactKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE, false, true);
+  this.zKey        = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.Z,     false, true);
+  this.enterKey    = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER, false, true);
+
   this._createAnimations();
   
   this.posText = this.add
@@ -162,10 +174,17 @@ export class WorldScene extends Phaser.Scene {
       return;
     }
 
-    // Interact (A button or Space key)
-    const keyInteract = Phaser.Input.Keyboard.JustDown(this.interactKey);
+    // Interact (A button, Z key, or Space key)
+    const keyInteract = Phaser.Input.Keyboard.JustDown(this.interactKey) ||
+                        Phaser.Input.Keyboard.JustDown(this.zKey);
+
     if (keyInteract || dpadInteractJust) {
       this._tryInteract();
+    }
+
+    // Check for Menu (Enter key)
+    if (Phaser.Input.Keyboard.JustDown(this.enterKey)) {
+        this.onOpenMenu?.();
     }
 
     const { left, right, up, down } = this.cursors;
@@ -264,6 +283,7 @@ export class WorldScene extends Phaser.Scene {
           tileY: spawnY,
           onSave: this.onSave,
           onInteract: this.onInteract,
+          onOpenMenu: this.onOpenMenu, // NEW
           dpad: this.dpad,
         } satisfies InitData);
       },
@@ -328,3 +348,4 @@ export class WorldScene extends Phaser.Scene {
     }
   }
 }
+

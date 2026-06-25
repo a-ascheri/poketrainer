@@ -95,9 +95,13 @@
     inset 0 4px 16px rgba(0, 0, 0, 0.95),
     0 0 0 1px #1c1c3c;
   margin: 0 auto 18px;
-  overflow: hidden;
+  
+
   position: relative;
-  width: 320px;
+  width: 320px;  // Ancho fijo del canvas
+  height: 288px; // Alto fijo del canvas
+  overflow: hidden; // Evita desbordes durante la carga
+  flex-shrink: 0; // Evita que se encoja
 }
 
 /* ── Off / loading / error screen ──────────────────────────────────── */
@@ -181,7 +185,7 @@ canvas {
     word-break: break-word; // Rompe palabras largas si es necesario
     line-height: 1.4;       // Espaciado entre líneas
     max-height: 80px;       // Altura máxima para no salirse del cuadro
-    //overflow-y: auto;       // Scroll si es muy largo
+    //overflow-y: auto;     // Scroll si es muy largo
 
   }
 
