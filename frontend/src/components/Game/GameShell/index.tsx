@@ -55,6 +55,61 @@ export default function GameShell() {
 
   // ── Efectos ──────────────────────────────────────────────────────────
 
+  // Prevenir zoom en móviles y selección de texto
+  useEffect(() => {
+    // Prevenir gestos de zoom con dos dedos
+    const preventTouchZoom = (e: TouchEvent) => {
+      if (e.touches.length > 1) {
+        e.preventDefault();
+      }
+    };
+
+    // Prevenir zoom con Ctrl + rueda o Cmd + rueda
+    const preventWheelZoom = (e: WheelEvent) => {
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+      }
+    };
+
+    // Prevenir selección de texto en toda la interfaz del juego
+    const preventTextSelection = (e: Event) => {
+      const target = e.target as HTMLElement;
+      // Permitir selección en inputs y textareas
+      if (target instanceof HTMLInputElement || 
+          target instanceof HTMLTextAreaElement ||
+          target instanceof HTMLSelectElement) {
+        return;
+      }
+      e.preventDefault();
+    };
+
+    // Prevenir menú contextual (long press) en móviles
+    const preventContextMenu = (e: Event) => {
+      const target = e.target as HTMLElement;
+      if (target instanceof HTMLInputElement || 
+          target instanceof HTMLTextAreaElement ||
+          target instanceof HTMLSelectElement) {
+        return;
+      }
+      e.preventDefault();
+    };
+
+    // Agregar listeners para prevenir zoom
+    document.addEventListener('touchmove', preventTouchZoom, { passive: false });
+    document.addEventListener('wheel', preventWheelZoom, { passive: false });
+    
+    // Agregar listeners para prevenir selección de texto y menú contextual
+    document.addEventListener('selectstart', preventTextSelection);
+    document.addEventListener('contextmenu', preventContextMenu);
+
+    return () => {
+      document.removeEventListener('touchmove', preventTouchZoom);
+      document.removeEventListener('wheel', preventWheelZoom);
+      document.removeEventListener('selectstart', preventTextSelection);
+      document.removeEventListener('contextmenu', preventContextMenu);
+    };
+  }, []);
+
   // Solo forzar foco cuando se hace clic en el contenedor del juego
   useEffect(() => {
     const handleContainerClick = () => {
@@ -419,11 +474,20 @@ export default function GameShell() {
     return allPokemon?.find((p) => p.id === slot.trainer_pokemon_id) ?? null;
   });
 
-  const startLabel = status === 'off' ? (saveData ? 'CONTINUE' : 'START') : 'START';
+  // ── Constantes de UI ──────────────────────────────────────────────────
+  const startLabel = 'START'
 
   // ── Render ──────────────────────────────────────────────────────────
   return (
-    <div className="gbc">
+    <div 
+      className="gbc"
+      style={{
+        userSelect: 'none',
+        WebkitUserSelect: 'none',
+        WebkitTouchCallout: 'none',
+        touchAction: 'none',
+      }}
+    >
       {/* Header */}
       <div className="gbc__header">
         <div className="gbc__power-indicator">
@@ -474,6 +538,9 @@ export default function GameShell() {
               width: GAME_WIDTH,
               height: GAME_HEIGHT,
               flexShrink: 0,
+              userSelect: 'none',
+              WebkitUserSelect: 'none',
+              touchAction: 'none',
             }}
           >
             <PhaserGame
@@ -494,7 +561,13 @@ export default function GameShell() {
           const lines = dialogText.split('\n').filter(line => line.trim() !== '');
           const currentLine = lines[currentLineIndex] || '';
           return (
-            <div className="gbc__dialog">
+            <div 
+              className="gbc__dialog"
+              style={{
+                userSelect: 'none',
+                WebkitUserSelect: 'none',
+              }}
+            >
               <div className="gbc__dialog-text">{currentLine}</div>
               <span className="gbc__dialog-hint">▼</span>
             </div>
@@ -503,7 +576,13 @@ export default function GameShell() {
 
         {/* Party overlay */}
         {overlay === 'party' && (
-          <div className="gbc__overlay">
+          <div 
+            className="gbc__overlay"
+            style={{
+              userSelect: 'none',
+              WebkitUserSelect: 'none',
+            }}
+          >
             <div className="gbc__overlay-header">
               <span>POKÉMON</span>
               <button className="gbc__overlay-close" onClick={() => setOverlay('none')}>✕</button>
@@ -517,6 +596,7 @@ export default function GameShell() {
                         className="gbc__party-sprite"
                         src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${mon.pokemon.pokeapi_id}.png`}
                         alt={mon.pokemon.name}
+                        draggable={false}
                       />
                       <div className="gbc__party-info">
                         <span className="gbc__party-name">{mon.pokemon.name.toUpperCase()}</span>
@@ -546,7 +626,13 @@ export default function GameShell() {
 
         {/* Pause menu overlay */}
         {overlay === 'menu' && (
-          <div className="gbc__overlay gbc__overlay--menu">
+          <div 
+            className="gbc__overlay gbc__overlay--menu"
+            style={{
+              userSelect: 'none',
+              WebkitUserSelect: 'none',
+            }}
+          >
             <p className="gbc__menu-title">PAUSA</p>
             <button className="gbc__menu-btn" onClick={handleManualSave} disabled={saveStatus === 'saving'}>
               {saveStatus === 'saving' ? 'GUARDANDO…' : 'GUARDAR'}
@@ -561,7 +647,15 @@ export default function GameShell() {
       </div>
 
       {/* Controls */}
-      <div className="gbc__controls" onContextMenu={(e) => e.preventDefault()}>
+      <div 
+        className="gbc__controls" 
+        onContextMenu={(e) => e.preventDefault()}
+        style={{
+          userSelect: 'none',
+          WebkitUserSelect: 'none',
+          touchAction: 'none',
+        }}
+      >
         {/* D-pad */}
         <div className="gbc__dpad">
           <div className="gbc__dpad-cross" />
@@ -571,6 +665,7 @@ export default function GameShell() {
             onPointerUp={() => releaseDpad('up')}
             onPointerLeave={() => releaseDpad('up')}
             aria-label="Up"
+            style={{ touchAction: 'none' }}
           >▲</button>
           <button
             className={`dpad-btn dpad-btn--left${keysDown.left ? ' dpad-btn--active' : ''}`}
@@ -578,6 +673,7 @@ export default function GameShell() {
             onPointerUp={() => releaseDpad('left')}
             onPointerLeave={() => releaseDpad('left')}
             aria-label="Left"
+            style={{ touchAction: 'none' }}
           >◀</button>
           <div className="dpad-btn dpad-btn--mid" />
           <button
@@ -586,6 +682,7 @@ export default function GameShell() {
             onPointerUp={() => releaseDpad('right')}
             onPointerLeave={() => releaseDpad('right')}
             aria-label="Right"
+            style={{ touchAction: 'none' }}
           >▶</button>
           <button
             className={`dpad-btn dpad-btn--down${keysDown.down ? ' dpad-btn--active' : ''}`}
@@ -593,6 +690,7 @@ export default function GameShell() {
             onPointerUp={() => releaseDpad('down')}
             onPointerLeave={() => releaseDpad('down')}
             aria-label="Down"
+            style={{ touchAction: 'none' }}
           >▼</button>
         </div>
 
@@ -604,6 +702,7 @@ export default function GameShell() {
             onMouseDown={(e) => e.preventDefault()}
             onClick={(e) => { forceFocus(e); handleSelect(); }}
             disabled={status !== 'running'}
+            style={{ touchAction: 'none' }}
           >SELECT</button>
           <button
             type="button"
@@ -611,6 +710,7 @@ export default function GameShell() {
             onMouseDown={(e) => e.preventDefault()}
             onClick={(e) => { forceFocus(e); handleStart(); }}
             disabled={status === 'loading'}
+            style={{ touchAction: 'none' }}
           >
             {startLabel}
           </button>
@@ -635,6 +735,7 @@ export default function GameShell() {
             onMouseDown={(e) => e.preventDefault()}
             onPointerDown={(e) => { forceFocus(e); handleBPress(); }}
             aria-label="B"
+            style={{ touchAction: 'none' }}
           >B</button>
           <button
             type="button"
@@ -644,13 +745,14 @@ export default function GameShell() {
             onPointerUp={() => handleARelease()}
             onPointerLeave={() => handleARelease()}
             aria-label="A"
+            style={{ touchAction: 'none' }}
           >A</button>
         </div>
       </div>
 
       {/* Footer */}
       <div className="gbc__footer">
-        <span className="gbc__footer-text">Game Boy Color ™</span>
+        <span className="gbc__footer-text">GameBox Color™</span>
       </div>
     </div>
   );
