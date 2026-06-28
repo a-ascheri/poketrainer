@@ -205,7 +205,7 @@ canvas {
 
 /* ── Generic overlay (party / menu) ─────────────────────────────── */
 .gbc__overlay {
-  background: rgba(8, 8, 18, 0.97);
+  background: rgb(15, 15, 33);
   bottom: 0;
   display: flex;
   flex-direction: column;
@@ -214,6 +214,13 @@ canvas {
   right: 0;
   top: 0;
   z-index: 10;
+
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  backface-visibility: hidden;  // Previene problemas de renderizado
+  -webkit-backface-visibility: hidden;
+  transform: translateZ(0);  // Acelera GPU rendering
 }
 
 .gbc__overlay-header {
@@ -559,3 +566,10 @@ canvas {
   letter-spacing: 2px;
 }
 
+/* ── Mobile touch improvements ──────────────────────────────────── */
+
+/* Eliminar el highlight azul en móviles */
+* {
+  -webkit-tap-highlight-color: transparent !important;
+  -webkit-touch-callout: none !important;
+}
