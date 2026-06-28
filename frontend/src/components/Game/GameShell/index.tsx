@@ -33,34 +33,91 @@ export default function GameShell() {
   const overlayRef = useRef<Overlay>('none');
   const dialogRef = useRef<string | null>(null);
   const gameContainerRef = useRef<HTMLDivElement>(null);
+  const isGameFocusedRef = useRef<boolean>(false);
   const dpadRef = useRef<DpadState>({
     up: false, down: false, left: false, right: false, interact: false, blocked: false,
   });
 
-  // ── Función para forzar el foco y evitar pérdida de foco ────────────
+  // ── Función para forzar el foco solo cuando es necesario ────────────
   const forceFocus = (e?: React.SyntheticEvent) => {
     if (e) e.preventDefault();
-        if (gameContainerRef.current) {
-          gameContainerRef.current.focus();
-        }
-      };
-      
-  // ── Efectos ──────────────────────────────────────────────────────────
-
-  useEffect(() => {
-  const takeFocus = (e: FocusEvent) => {
-    // Si el elemento que recibe el foco no es el juego, lo "robamos"
-    if (gameContainerRef.current && e.target !== gameContainerRef.current) {
-        // Solo robamos foco si no es un campo de input
-        if (!(e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement)) {
-            gameContainerRef.current.focus();
-        }
+    if (gameContainerRef.current && document.activeElement !== gameContainerRef.current) {
+      // Solo forzar foco si el juego está running y no hay inputs activos
+      if (statusRef.current === 'running' && 
+          !(document.activeElement instanceof HTMLInputElement || 
+            document.activeElement instanceof HTMLTextAreaElement ||
+            document.activeElement instanceof HTMLSelectElement)) {
+        gameContainerRef.current.focus();
+        isGameFocusedRef.current = true;
+      }
     }
   };
 
-  document.addEventListener('focusin', takeFocus, true);
-  return () => document.removeEventListener('focusin', takeFocus, true);
-}, []);
+  // ── Efectos ──────────────────────────────────────────────────────────
+
+  // Solo forzar foco cuando se hace clic en el contenedor del juego
+  useEffect(() => {
+    const handleContainerClick = () => {
+      if (statusRef.current === 'running') {
+        gameContainerRef.current?.focus();
+        isGameFocusedRef.current = true;
+      }
+    };
+
+    const container = gameContainerRef.current;
+    if (container) {
+      container.addEventListener('click', handleContainerClick);
+      return () => container.removeEventListener('click', handleContainerClick);
+    }
+  }, []);
+
+  // Manejar pérdida de foco solo si es causada por elementos no interactivos
+  useEffect(() => {
+    const handleFocusOut = (e: FocusEvent) => {
+      // Si el juego está running y el foco se pierde hacia un elemento no interactivo
+      if (statusRef.current === 'running' && 
+          gameContainerRef.current && 
+          e.relatedTarget instanceof HTMLElement) {
+        const target = e.relatedTarget;
+        // No robar foco si es un input, textarea, select o elemento editable
+        if (!(target instanceof HTMLInputElement || 
+              target instanceof HTMLTextAreaElement ||
+              target instanceof HTMLSelectElement ||
+              target.isContentEditable)) {
+          // Pero tampoco robarlo agresivamente, solo si es necesario
+          setTimeout(() => {
+            if (document.activeElement !== gameContainerRef.current) {
+              gameContainerRef.current?.focus();
+              isGameFocusedRef.current = true;
+            }
+          }, 50);
+        }
+      }
+    };
+
+    document.addEventListener('focusout', handleFocusOut);
+    return () => document.removeEventListener('focusout', handleFocusOut);
+  }, []);
+
+  // Manejar eventos de foco para trackear el estado
+  useEffect(() => {
+    const handleFocus = () => {
+      isGameFocusedRef.current = true;
+    };
+    const handleBlur = () => {
+      isGameFocusedRef.current = false;
+    };
+
+    const container = gameContainerRef.current;
+    if (container) {
+      container.addEventListener('focus', handleFocus);
+      container.addEventListener('blur', handleBlur);
+      return () => {
+        container.removeEventListener('focus', handleFocus);
+        container.removeEventListener('blur', handleBlur);
+      };
+    }
+  }, []);
 
   useEffect(() => { saveDataRef.current = saveData; }, [saveData]);
   useEffect(() => { statusRef.current = status; }, [status]);
@@ -91,14 +148,6 @@ export default function GameShell() {
       .catch(() => setSaveData(null));
   }, []);
 
-  // ... existing code ...
-  useEffect(() => {
-    const handleGlobalClick = () => forceFocus();
-    document.addEventListener('click', handleGlobalClick);
-    return () => document.removeEventListener('click', handleGlobalClick);
-  }, []);
-  // ... existing code ...
-
   // ── FILTRO: La barra espaciadora NO afecta al diálogo ──────────────
   useEffect(() => {
     const filterSpace = (e: KeyboardEvent) => {
@@ -112,21 +161,20 @@ export default function GameShell() {
       document.removeEventListener('keydown', filterSpace, true);
     };
   }, [dialogText]);
+
   // ── ENFOQUE DEFINITIVO ──────────────────────────────────────────────
   useEffect(() => {
     if (status === 'running') {
-      forceFocus();
-      setTimeout(forceFocus, 100);
-      setTimeout(forceFocus, 300);
-      setTimeout(forceFocus, 500);
-      setTimeout(forceFocus, 800);
+      setTimeout(() => {
+        if (gameContainerRef.current && document.activeElement !== gameContainerRef.current) {
+          gameContainerRef.current.focus();
+          isGameFocusedRef.current = true;
+        }
+      }, 100);
     }
   }, [status]);
 
   // ── Acción unificada de interacción ─────────────────────────────────
-  // IMPORTANTE: usa refs en lugar de estado para evitar closures stale en el
-  // handler de teclado (el useEffect se registra una sola vez y no ve
-  // actualizaciones de estado posteriores).
   const handleInteractAction = () => {
     if (dialogRef.current !== null) {
       const lines = dialogRef.current.split('\n').filter(line => line.trim() !== '');
@@ -149,9 +197,31 @@ export default function GameShell() {
   // ── Teclado ──────────────────────────────────────────────────────────
   useEffect(() => {
     const onDown = (e: KeyboardEvent) => {
+      // Si el foco está en un campo de texto u otro elemento interactivo
+      // o si el juego no tiene foco, dejar pasar el evento
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || (e.target as HTMLElement)?.isContentEditable) {
+        return;
+      }
+
+      // Enter → START (arrancar / pausar-reanudar) 
+      // Esto funciona incluso cuando el juego está apagado
+      if (e.code === 'Enter') {
+        e.preventDefault();
+        e.stopPropagation();
+        handleStart();
+        return;
+      }
+
+      // Solo procesar el resto de teclas del juego si el juego está running y tiene foco
+      if (statusRef.current !== 'running' || !isGameFocusedRef.current) {
+        return;
+      }
+
       const dir = KEY_DIR[e.code];
       if (dir) {
         e.preventDefault();
+        e.stopPropagation();
         dpadRef.current[dir] = true;
         setKeysDown((p) => p[dir] ? p : { ...p, [dir]: true });
         return;
@@ -160,31 +230,32 @@ export default function GameShell() {
       // Space → SELECT (party / avanzar diálogo)
       if (e.code === 'Space') {
         e.preventDefault();
+        e.stopPropagation();
         handleSelect();
         return;
       }
 
-      // Z → interacción con el mundo (signos, NPCs) via dpadRef
+      // Z → interacción con el mundo (signos, NPCs)
       if (e.code === 'KeyZ') {
         e.preventDefault();
+        e.stopPropagation();
         handleInteractAction();
-        return;
-      }
-
-      // Enter → START (arrancar / pausar-reanudar)
-      if (e.code === 'Enter') {
-        e.preventDefault();
-        handleStart();
         return;
       }
 
       if (e.code === 'Escape') {
         e.preventDefault();
+        e.stopPropagation();
         setOverlay('none');
       }
     };
 
     const onUp = (e: KeyboardEvent) => {
+      // Solo procesar si el juego tiene foco
+      if (statusRef.current !== 'running' || !isGameFocusedRef.current) {
+        return;
+      }
+
       const dir = KEY_DIR[e.code];
       if (dir) {
         dpadRef.current[dir] = false;
@@ -196,35 +267,49 @@ export default function GameShell() {
       }
     };
 
-    // [] → se registra una sola vez; todas las lecturas de estado usan refs.
+    // Usar capture phase para asegurar que el shell maneje las teclas antes
+    // que otros listeners en la página
     window.addEventListener('keydown', onDown, true);
     window.addEventListener('keyup', onUp, true);
+    
     return () => {
       window.removeEventListener('keydown', onDown, true);
       window.removeEventListener('keyup', onUp, true);
     };
   }, []);
+
   // ── Actions ──────────────────────────────────────────────────────────
   const handleStart = async () => {
     if (statusRef.current === 'loading') return;
+    
+    // Si el juego está running, alternar el menú de pausa
     if (statusRef.current === 'running') {
       setOverlay((o) => o === 'menu' ? 'none' : 'menu');
       return;
     }
-    setStatus('loading');
-    try {
-      let save = saveDataRef.current;
-      if (!save) save = await gameService.newGame();
-      setSaveData(save);
-      saveDataRef.current = save;
-      lastKnownPosRef.current = {
-        tileX: save.tile_x ?? 5,
-        tileY: save.tile_y ?? 7,
-        mapKey: save.map_id ?? 'pine_town'
-      };
-      setStatus('running');
-    } catch {
-      setStatus('error');
+    
+    // Si el juego está apagado, iniciarlo
+    if (statusRef.current === 'off') {
+      setStatus('loading');
+      try {
+        let save = saveDataRef.current;
+        if (!save) save = await gameService.newGame();
+        setSaveData(save);
+        saveDataRef.current = save;
+        lastKnownPosRef.current = {
+          tileX: save.tile_x ?? 5,
+          tileY: save.tile_y ?? 7,
+          mapKey: save.map_id ?? 'pine_town'
+        };
+        setStatus('running');
+        // Dar foco al juego después de iniciar
+        setTimeout(() => {
+          gameContainerRef.current?.focus();
+          isGameFocusedRef.current = true;
+        }, 50);
+      } catch {
+        setStatus('error');
+      }
     }
   };
 
@@ -280,6 +365,7 @@ export default function GameShell() {
     setDialogText(null);
     dialogRef.current = null;
     setSaveStatus('idle');
+    isGameFocusedRef.current = false;
   };
 
   const handleAutosave = async (tileX: number, tileY: number, mapKey: string) => {
@@ -295,16 +381,19 @@ export default function GameShell() {
 
   // ── Input helpers ────────────────────────────────────────────────────
   const pressDpad = (dir: 'up' | 'down' | 'left' | 'right') => {
+    if (statusRef.current !== 'running') return;
     dpadRef.current[dir] = true;
     setKeysDown((p) => ({ ...p, [dir]: true }));
   };
 
   const releaseDpad = (dir: 'up' | 'down' | 'left' | 'right') => {
+    if (statusRef.current !== 'running') return;
     dpadRef.current[dir] = false;
     setKeysDown((p) => ({ ...p, [dir]: false }));
   };
 
   const handleAPress = () => {
+    if (statusRef.current !== 'running') return;
     handleInteractAction();
   };
 
@@ -313,6 +402,7 @@ export default function GameShell() {
   };
 
   const handleBPress = () => {
+    if (statusRef.current !== 'running') return;
     if (dialogText !== null) {
       setDialogText(null);
       setCurrentLineIndex(0);
@@ -355,8 +445,8 @@ export default function GameShell() {
               <span className="gbc__screen-subtitle">
                 {saveData.map_id.replace(/_/g, ' ')} · {Math.floor((saveData.play_time_seconds ?? 0) / 60)}m
               </span>
-                  )}
-                </div>
+            )}
+          </div>
         )}
 
         {status === 'loading' && (
@@ -407,8 +497,8 @@ export default function GameShell() {
             <div className="gbc__dialog">
               <div className="gbc__dialog-text">{currentLine}</div>
               <span className="gbc__dialog-hint">▼</span>
-        </div>
-  );
+            </div>
+          );
         })()}
 
         {/* Party overlay */}
@@ -477,14 +567,14 @@ export default function GameShell() {
           <div className="gbc__dpad-cross" />
           <button
             className={`dpad-btn dpad-btn--up${keysDown.up ? ' dpad-btn--active' : ''}`}
-            onPointerDown={(e) => { e.preventDefault(); forceFocus(); pressDpad('up'); }}
+            onPointerDown={(e) => { e.preventDefault(); forceFocus(e); pressDpad('up'); }}
             onPointerUp={() => releaseDpad('up')}
             onPointerLeave={() => releaseDpad('up')}
             aria-label="Up"
           >▲</button>
           <button
             className={`dpad-btn dpad-btn--left${keysDown.left ? ' dpad-btn--active' : ''}`}
-            onPointerDown={(e) => { e.preventDefault(); forceFocus(); pressDpad('left'); }}
+            onPointerDown={(e) => { e.preventDefault(); forceFocus(e); pressDpad('left'); }}
             onPointerUp={() => releaseDpad('left')}
             onPointerLeave={() => releaseDpad('left')}
             aria-label="Left"
@@ -492,14 +582,14 @@ export default function GameShell() {
           <div className="dpad-btn dpad-btn--mid" />
           <button
             className={`dpad-btn dpad-btn--right${keysDown.right ? ' dpad-btn--active' : ''}`}
-            onPointerDown={(e) => { e.preventDefault(); forceFocus(); pressDpad('right'); }}
+            onPointerDown={(e) => { e.preventDefault(); forceFocus(e); pressDpad('right'); }}
             onPointerUp={() => releaseDpad('right')}
             onPointerLeave={() => releaseDpad('right')}
             aria-label="Right"
           >▶</button>
           <button
             className={`dpad-btn dpad-btn--down${keysDown.down ? ' dpad-btn--active' : ''}`}
-            onPointerDown={(e) => { e.preventDefault(); forceFocus(); pressDpad('down'); }}
+            onPointerDown={(e) => { e.preventDefault(); forceFocus(e); pressDpad('down'); }}
             onPointerUp={() => releaseDpad('down')}
             onPointerLeave={() => releaseDpad('down')}
             aria-label="Down"
